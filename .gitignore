@@ -6,6 +6,47 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+config
+
+*.sqlite
+
+src/lang
+
+*.png
+
+changelog.js
+status.js
+playerlist.js
+gif.js
+
+handlers
+
+*.txt
+
+structures
+
+temp
+
+googleBuilder.js
+googleSuggestions.js
+
+img
+
+schemas
+
+insta.json
+
+instagram.js
+youtube.js
+
+audio
+
+secret.json
+
+api.js
+
+package-lock.json
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
