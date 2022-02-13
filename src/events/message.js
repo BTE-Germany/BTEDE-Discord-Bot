@@ -47,79 +47,7 @@ class MessageEvent extends BaseEvent {
                                         msg.channel.send({ content: `https://crafatar.com/renders/body/${uuid?.data?.id}?overlay=true `});
                 };
 
-                cData[cData.step] = msg.content;
-
-                //moderate links and bad words
-                //make it lowercase
-  let msgcontent = msg.content.toLowerCase();
-  //define meber
-    const member = msg.member;
-  
-     //embed message for links
-     const linkembed = new Discord.MessageEmbed()
-     .setTitle("Moderation!")
-     .setAuthor(msg.author.tag, msg.author.avatarURL, msg.author.avatarURL)
-     .setColor('#ff0000')
-     .setDescription(`Der/Die Benutzer/-in hat ohne Berechtigungen einen Link veröffentlicht! (${msgcontent})`)
-     .setTimestamp()
-     //embed message for bad words
-     const badwordembed = new Discord.MessageEmbed()
-     .setTitle("Moderation!")
-     .setAuthor(msg.author.tag, msg.author.avatarURL, msg.author.avatarURL)
-     .setColor('#ff0000')
-     .setDescription(`Der/Die Benutzer/-in hat was schlechtes gesagt! (${msgcontent})`)
-     .setTimestamp()
-  
-   //http links
-   if (msgcontent.includes("http://")) {
-    if (member.roles.cache.has(process.env.URLROLE||process.env.WHITEROLE)){
-    }
-    //exclude google
-      else{
-        if(msgcontent.includes("http://google.com"||"http://google.de"||"http://buildtheearth.net"||"http://bte-germany.de"||"http://map.bte-germany.de"||"http://tenor.com"||"http://imgur.com"||"http://instagram.com/buildtheearthgermany"||"http://www.youtube.com/channel/UCwT_NzvItuHf6_YPz08jwdg"||"http://www.twitch.tv/bte_germany"||"http://discord.gg/GkSxGTYaAJ"||"http://discord.gg/3mrQBYd")){
-          msg.react('✅');
-        }else{
-          //delete Message
-          client.channels.cache.get(process.env.LOG).send({embeds: [linkembed]});
-          msg.delete();
-          console.log(clc.red("Link gelöscht!"));
-        }
-      }
-      }
-        
-
-      //same with https://
-      if (msgcontent.includes("https://")) {
-        if (member.roles.cache.has(process.env.URLROLE||process.env.WHITEROLE)){
-        }
-        //exclude google
-          else{
-            if(msgcontent.includes("https://google.com"||"https://google.de"||"https://buildtheearth.net"||"https://bte-germany.de"||"https://map.bte-germany.de"||"https://tenor.com"||"https://imgur.com"||"https://instagram.com/buildtheearthgermany"||"https://www.youtube.com/channel/UCwT_NzvItuHf6_YPz08jwdg"||"https://www.twitch.tv/bte_germany"||"https://discord.gg/GkSxGTYaAJ"||"https://discord.gg/3mrQBYd")){
-              msg.react('✅');
-            }else{
-              //delete Message
-              client.channels.cache.get(process.env.LOG).send({embeds: [linkembed]});
-              msg.delete();
-              console.log(clc.red("Link gelöscht!"));
-            }
-          }
-          }
-            //check if bad word de
-            let messageprof = wash.check('de', msgcontent);
-            //check if bad word en
-            let messageprofen = wash.check('en', msgcontent);
-            //delete if bad word de
-            if (messageprof === true){
-              client.channels.cache.get(process.env.LOG).send({embeds: [badwordembed]});
-              msg.delete();
-              console.log(clc.red("Böse Nachricht gelöscht!"));
-            }
-            //delete if bad word en
-            if (messageprofen === true){
-              client.channels.cache.get(process.env.LOG).send({embeds: [badwordembed]});
-              msg.delete();
-              console.log(clc.red("Böse Nachricht gelöscht!"));
-            }
+                cData[cData.step] = msg.content;  
                 
                 // edit buttons
                 let m = await msg.channel.messages.fetch(cData.msg).catch(client.Logger.warn);
@@ -232,6 +160,78 @@ class MessageEvent extends BaseEvent {
             })
 
         }
+
+                      //moderate links and bad words
+                //make it lowercase
+  let msgcontent = msg.content.toLowerCase();
+  //define meber
+    const member = msg.member;
+  
+     //embed message for links
+     const linkembed = new Discord.MessageEmbed()
+     .setTitle("Moderation!")
+     .setAuthor(msg.author.tag, msg.author.avatarURL, msg.author.avatarURL)
+     .setColor('#ff0000')
+     .setDescription(`Der/Die Benutzer/-in hat ohne Berechtigungen einen Link veröffentlicht! (${msgcontent})`)
+     .setTimestamp()
+     //embed message for bad words
+     const badwordembed = new Discord.MessageEmbed()
+     .setTitle("Moderation!")
+     .setAuthor(msg.author.tag, msg.author.avatarURL, msg.author.avatarURL)
+     .setColor('#ff0000')
+     .setDescription(`Der/Die Benutzer/-in hat was schlechtes gesagt! (${msgcontent})`)
+     .setTimestamp()
+  
+   //http links
+   if (msgcontent.includes("http://")) {
+    if (member.roles.cache.has(process.env.URLROLE||process.env.WHITEROLE)){
+    }
+    //exclude google
+      else{
+        if(msgcontent.includes("http://google.com"||"http://google.de"||"http://buildtheearth.net"||"http://bte-germany.de"||"http://map.bte-germany.de"||"http://tenor.com"||"http://imgur.com"||"http://instagram.com/buildtheearthgermany"||"http://www.youtube.com/channel/UCwT_NzvItuHf6_YPz08jwdg"||"http://www.twitch.tv/bte_germany"||"http://discord.gg/GkSxGTYaAJ"||"http://discord.gg/3mrQBYd")){
+          msg.react('✅');
+        }else{
+          //delete Message
+          client.channels.cache.get(process.env.LOG).send({embeds: [linkembed]});
+          msg.delete();
+          console.log(clc.red("Link gelöscht!"));
+        }
+      }
+      }
+        
+
+      //same with https://
+      if (msgcontent.includes("https://")) {
+        if (member.roles.cache.has(process.env.URLROLE||process.env.WHITEROLE)){
+        }
+        //exclude google
+          else{
+            if(msgcontent.includes("https://google.com"||"https://google.de"||"https://buildtheearth.net"||"https://bte-germany.de"||"https://map.bte-germany.de"||"https://tenor.com"||"https://imgur.com"||"https://instagram.com/buildtheearthgermany"||"https://www.youtube.com/channel/UCwT_NzvItuHf6_YPz08jwdg"||"https://www.twitch.tv/bte_germany"||"https://discord.gg/GkSxGTYaAJ"||"https://discord.gg/3mrQBYd")){
+              msg.react('✅');
+            }else{
+              //delete Message
+              client.channels.cache.get(process.env.LOG).send({embeds: [linkembed]});
+              msg.delete();
+              console.log(clc.red("Link gelöscht!"));
+            }
+          }
+          }
+            //check if bad word de
+            let messageprof = wash.check('de', msgcontent);
+            //check if bad word en
+            let messageprofen = wash.check('en', msgcontent);
+            //delete if bad word de
+            if (messageprof === true){
+              client.channels.cache.get(process.env.LOG).send({embeds: [badwordembed]});
+              msg.delete();
+              console.log(clc.red("Böse Nachricht gelöscht!"));
+            }
+            //delete if bad word en
+            if (messageprofen === true){
+              client.channels.cache.get(process.env.LOG).send({embeds: [badwordembed]});
+              msg.delete();
+              console.log(clc.red("Böse Nachricht gelöscht!"));
+            }
     };
 };
 
