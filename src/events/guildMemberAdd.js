@@ -2,6 +2,10 @@ const { MessageEmbed, GuildMemberManager, GuildAuditLogs, GuildMember } = requir
 const BaseEvent = require("../classes/Event.js");
 const Bot = require("../classes/Bot.js");
 
+const JSONdb = require('simple-json-db');
+const db = new JSONdb('./welcomedb.json');
+
+
 class GuildMemberAddEvent extends BaseEvent {
     constructor() {
         super('guildMemberAdd');
@@ -52,7 +56,26 @@ class GuildMemberAddEvent extends BaseEvent {
         await member.roles.add(client.config.roles.muted).catch(client.Logger.error);
 
         member.send({ embeds: [ muteEmbed ]}).catch(e => {});
-    };
-};
+
+
+        //send welcome message for new members
+
+        if(await db.get('enabled') === true) {
+
+            let timenow = Math.floor(new Date() / 1000)
+            let diff = timenow - db.get(member.user.id)
+            if (!db.has(member.user.id) || diff > 1800) {
+                await db.set(member.user.id, timenow);
+                await client.channels.cache.get(client.config.general).send(`Herzlich Willkommen <@${member.user.id}> bei BTE Germany!
+
+Schau doch mal hier vorbei 🙂 :
+・<#796403957135573072>
+・<#781620107406606347>
+・Fortschrittskarte: https://bte-germany.de/map`);
+            }
+        }
+        };
+
+}
 
 module.exports = GuildMemberAddEvent;
