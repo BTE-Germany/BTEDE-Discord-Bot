@@ -1,5 +1,5 @@
 {
-  "name": "qreepex_dc_bot_base",
+  "name": "btede-discord-bot",
   "version": "1.0.0",
   "description": "credits: https://qreepex.xyz",
   "main": "index.js",
@@ -24,6 +24,7 @@
     "express": "^4.17.2",
     "ffmpeg-static": "^4.4.0",
     "googleapis": "^92.0.0",
+    "libsodium-wrappers": "^0.7.10",
     "minecraft-server-util": "^3.6.0",
     "mongoose": "^5.13.10",
     "ms": "^2.1.3",
