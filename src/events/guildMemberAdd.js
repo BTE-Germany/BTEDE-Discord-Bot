@@ -23,6 +23,27 @@ class GuildMemberAddEvent extends BaseEvent {
 
   async run(client, member) {
     if (member.partial) await member.fetch();
+    await member.user.fetch();
+
+    // log
+    let joinLog = await client.channels
+      .fetch(client.config.channels.linklog)
+      .catch((e) => {
+        console.error("Critical Error: Couldnt load join log!");
+      });
+    if (joinLog)
+      joinLog.send({
+        embeds: [
+          new MessageEmbed()
+            .setColor(member.user.accentColor)
+            .setThumbnail(member.user.avatarURL({ dynamic: true }))
+            .setImage(member.user.bannerURL({ dynamic: true }))
+            .setTimestamp()
+            .setFooter(member.user.id, member.guild.iconURL({ dynamic: true }))
+            .setDescription(`<@!${member.user.id}> (${member.user.tag})`)
+            .setTitle("📈 New User"),
+        ],
+      });
 
     // mute
     let c = await client.schemas.case.findOne({
@@ -83,7 +104,10 @@ class GuildMemberAddEvent extends BaseEvent {
     }
 
     // welcome message
-    if (client.config.welcomeMessage === true && member.guild.id === client.config.guild) {
+    if (
+      client.config.welcomeMessage === true &&
+      member.guild.id === client.config.guild
+    ) {
       let userId = member.user.id;
       let now = Date.now();
       if (!client.joins.has(userId) || client.joins.get(userId) >= now - 18e5) {
