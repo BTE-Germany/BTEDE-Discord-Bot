@@ -1,9 +1,7 @@
 module.exports = class {
-    constructor (name = "") {
-        this.name = name;
-    }
+  constructor(name = "") {
+    this.name = name;
+  }
 
-    async run() {
-
-    }
-}
+  async run() {}
+};

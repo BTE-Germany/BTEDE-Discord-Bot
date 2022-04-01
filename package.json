@@ -1,45 +1,40 @@
 {
   "name": "btede-discord-bot",
   "version": "1.0.0",
+  "description": "credits: https://bte-germany.de",
   "main": "index.js",
   "type": "commonjs",
   "typings": "",
   "scripts": {
     "dev": "nodemon ./index.js"
   },
-  "author": "qreepex",
-  "repository": {
-    "url": "https://github.com/Build-the-Earth-Germany/BTEDE-Discord-Bot"
-  },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "@discordjs/builders": "^0.9.0",
     "@discordjs/opus": "^0.5.3",
     "@discordjs/voice": "^0.6.0",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "axios": "^0.24.0",
+    "body-parser": "^1.19.1",
     "chalk": "^4.1.2",
-    "cli-color": "^2.0.1",
     "cors": "^2.8.5",
     "discord-api-types": "^0.25.2",
     "discord.js": "^13.4.0",
-    "dotenv": "^16.0.0",
     "express": "^4.17.2",
     "ffmpeg-static": "^4.4.0",
-    "googleapi": "^1.0.2",
     "googleapis": "^92.0.0",
-    "i18next": "^20.6.1",
-    "i18next-fs-backend": "^1.1.1",
-    "libsodium-wrappers": "^0.7.9",
+    "libsodium-wrappers": "^0.7.10",
     "minecraft-server-util": "^3.6.0",
     "mongoose": "^5.13.10",
     "ms": "^2.1.3",
     "multer": "^1.4.3",
-    "node-json-db": "^1.5.0",
     "opusscript": "^0.0.8",
     "quick.db": "^7.1.3",
-    "request": "^2.88.2",
     "rss-parser": "^3.12.0",
-    "simple-json-db": "^2.0.0",
     "washyourmouthoutwithsoap": "^1.0.2"
+  },
+  "devDependencies": {
+    "prettier": "^2.6.1"
   }
 }
