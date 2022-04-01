@@ -83,7 +83,7 @@ class GuildMemberAddEvent extends BaseEvent {
     }
 
     // welcome message
-    if (client.config.welcomeMessage === true) {
+    if (client.config.welcomeMessage === true && member.guild.id === client.config.guild) {
       let userId = member.user.id;
       let now = Date.now();
       if (!client.joins.has(userId) || client.joins.get(userId) >= now - 18e5) {
@@ -91,7 +91,7 @@ class GuildMemberAddEvent extends BaseEvent {
           client.config.channels.generalDE
         );
         generalChat.send({
-          content: `<a:btede:853745991525859338> Herzlich Willkommen <@!${userId}> bei BTE-Germany!`,
+          content: `<a:btede:853745991525859338> Herzlich Willkommen <@!${userId}> bei **BTE-Germany**!`,
           components: [
             new MessageActionRow().addComponents([
               new MessageButton()
