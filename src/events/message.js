@@ -225,12 +225,25 @@ class MessageEvent extends BaseEvent {
         (msg.channel.id != client.config.channels.voiceText &&
           !msg.member.roles.cache.get(client.config.roles.level3))
       ) {
-        let args = content.split(" ");
-        let hasBlacklistedLink = false;
-        args.forEach((arg) => {
-          if (!client.config.whitelistedLinks[arg]) hasBlacklistedLink = true;
+        let args = content
+          .split(" ")
+          .filter((x) => x.startsWith("http://") || x.startsWith("https://"));
+        let links = [];
+        args.forEach((arg) =>
+          links.push(
+            arg.startsWith("https://")
+              ? arg
+              : arg.replace("http://", "https://")
+          )
+        );
+        let whitelisted = false;
+
+        links.forEach((link) => {
+          client.config.whitelistedLinks.forEach((wl) => {
+            if (link.startsWith(wl)) whitelisted = true;
+          });
         });
-        if (hasBlacklistedLink === true) {
+        if (whitelisted === false) {
           let sent = await msg
             .reply(":x: You are not allowed to send links in this chat!")
             .catch((e) => {});
@@ -254,18 +267,19 @@ class MessageEvent extends BaseEvent {
                     {
                       name: "👤 User",
                       value: `<@!${msg.author.id}> (${msg.author.tag})`,
-                      inline: true
-                    },{
+                      inline: true,
+                    },
+                    {
                       name: "⏰ Timestamp",
-                      value: `<t:${Math.round(msg.createdTimestamp / 1000)}:f> (<t:${
-                        Math.round(msg.createdTimestamp / 1000)
-                      }:R>)`,
-                      inline: true
+                      value: `<t:${Math.round(
+                        msg.createdTimestamp / 1000
+                      )}:f> (<t:${Math.round(msg.createdTimestamp / 1000)}:R>)`,
+                      inline: true,
                     },
                     {
                       name: "💬 Message",
                       value: `\`${msg.content}\``,
-                    }
+                    },
                   ])
                   .setAuthor({
                     name: msg.author.username,
@@ -302,13 +316,14 @@ class MessageEvent extends BaseEvent {
                 {
                   name: "👤 User",
                   value: `<@!${msg.author.id}> (${msg.author.tag})`,
-                  inline: true
-                },{
+                  inline: true,
+                },
+                {
                   name: "⏰ Timestamp",
-                  value: `<t:${Math.round(msg.createdTimestamp / 1000)}:f> (<t:${
-                    Math.round(msg.createdTimestamp / 1000)
-                  }:R>)`,
-                  inline: true
+                  value: `<t:${Math.round(
+                    msg.createdTimestamp / 1000
+                  )}:f> (<t:${Math.round(msg.createdTimestamp / 1000)}:R>)`,
+                  inline: true,
                 },
                 {
                   name: "💬 Message",
