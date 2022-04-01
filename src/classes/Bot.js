@@ -1,81 +1,108 @@
 const { Client, Collection, MessageEmbed } = require("discord.js"),
-util = require("util");
-const Logger = require("./Logger.js")
+  util = require("util");
+const Logger = require("./Logger.js");
 
 class Bot extends Client {
-    constructor(options) {
+  constructor(options) {
+    super(options);
+
+    this.wait = util.promisify(setTimeout);
+
+    this.embed = class extends MessageEmbed {
+      constructor(options) {
         super(options);
+        (this.color = "#347aeb"),
+          (this.timestamp = parseInt(console.timeStamp())),
+          (this.footer = {
+            text: "BTE Germany",
+            iconURL: this.interaction
+              ? this.interaction.guild.iconURL({ dynamic: true })
+              : null,
+          });
+      }
+    };
 
-        this.wait = util.promisify(setTimeout)
+    // join timeouts for join messages
+    this.joins = new Map();
 
-        this.embed = class extends MessageEmbed {
-            constructor(options) {
-                super(options);
-                this.color = "#347aeb",
-                this.timestamp = parseInt(console.timeStamp()),
-                this.footer = {
-                    text: "BTE Germany",
-                    iconURL: (this.interaction ? this.interaction.guild.iconURL({ dynamic: true }) : null)
-                }
-            }
-        }
+    this.Logger = new Logger();
 
-        this.Logger = new Logger()
+    /**
+     * Time parser.
+     * @param {Number} duration
+     * @returns {String}
+     */
 
-        /**
-         * Time parser.
-         * @param {Number} duration 
-         * @returns {String}
-         */
+    this.parseTime = function (duration) {
+      var weeks = Math.floor((duration / (1000 * 60 * 60 * 24 * 7)) % 51),
+        days = Math.floor((duration / (1000 * 60 * 60 * 24)) % 7),
+        hours = Math.floor((duration / (1000 * 60 * 60)) % 24),
+        minutes = Math.floor((duration / (1000 * 60)) % 60),
+        uptime = [
+          weeks === 1 ? weeks + " " + "week" : weeks + " " + "weeks",
+          days === 1 ? days + " " + "day" : days + " " + "days",
+          hours === 1 ? hours + " " + "hour" : hours + " " + "hours",
+          minutes === 1 ? minutes + " " + "minute" : minutes + " " + "minutes",
+        ]
+          .filter((time) => !time.startsWith("0"))
+          .join(", ");
 
-        this.parseTime = function(duration) {
-            var
-            weeks = Math.floor((duration / (1000 * 60 * 60 * 24 * 7)) % 51),
-            days = Math.floor((duration / (1000 * 60 * 60 * 24)) % 7),
-            hours = Math.floor((duration / (1000 * 60 * 60)) % 24),
-            minutes = Math.floor((duration / (1000 * 60)) % 60),
+      return uptime;
+    };
 
-            uptime = [
-                (weeks === 1) ? weeks + " " + "week" : weeks + " " + "weeks",
-                (days === 1) ? days + " " + "day" : days + " " + "days",
-                (hours === 1) ? hours + " " + "hour" : hours + " " + "hours",
-                (minutes === 1) ? minutes + " " + "minute" : minutes + " " + "minutes",
-            ].filter((time) => !time.startsWith("0")).join(", ");
+    /**
+     * Date parser.
+     * @param {Number} timestamp
+     * @returns {String}
+     */
 
-            return uptime;
-        }
+    this.parseDate = function (timestamp) {
+      let date = new Date(timestamp);
 
-        /**
-         * Date parser.
-         * @param {Number} timestamp 
-         * @returns {String}
-         */
+      let day =
+        date.getDate().toString().length === 1
+          ? "0" + date.getDate().toString()
+          : date.getDate().toString();
+      let month =
+        (date.getMonth() + 1).toString().length === 1
+          ? "0" + (date.getMonth() + 1).toString()
+          : (date.getMonth() + 1).toString();
 
-        this.parseDate = function(timestamp) {
-            let date = new Date(timestamp)
+      let hours =
+        date.getHours().toString().length === 1
+          ? "0" + date.getHours().toString()
+          : date.getHours().toString();
+      let minutes =
+        date.getMinutes().toString().length === 1
+          ? "0" + date.getMinutes().toString()
+          : date.getMinutes().toString();
 
-            let day = (date.getDate().toString().length === 1) ? "0"+date.getDate().toString() : date.getDate().toString()
-            let month = ((date.getMonth()+1).toString().length === 1) ? "0"+(date.getMonth()+1).toString() : (date.getMonth()+1).toString()
+      return (
+        hours +
+        ":" +
+        minutes +
+        " " +
+        day +
+        "." +
+        month +
+        "." +
+        date.getFullYear()
+      );
+    };
 
-            let hours = (date.getHours().toString().length === 1) ? "0"+date.getHours().toString() : date.getHours().toString()
-            let minutes = (date.getMinutes().toString().length === 1) ? "0"+date.getMinutes().toString() : date.getMinutes().toString()
+    this.commands = new Collection();
 
-            return (hours+":"+minutes+" "+day+"."+month+"."+date.getFullYear())
-        }
+    this.schemas = {
+      suggestion: require("../schemas/suggestion.js"),
+      case: require("../schemas/caseSchema.js"),
+    };
 
-        this.commands = new Collection()
+    this.usersInCreateProcess = new Collection();
 
-        this.schemas = {
-            suggestion: require("../schemas/suggestion.js"),
-            case: require("../schemas/caseSchema.js")
-        }
+    this.config = require("../../config/config.js");
 
-        this.usersInCreateProcess = new Collection();
-
-        this.config = require("../../config/config.js");
-
-        this.RCON = new (require("./RCON.js"))(this.config.rcon);
-    }
+    this.RCON = new (require("./RCON.js"))(this.config.rcon);
+  }
 }
 
-module.exports = Bot
+module.exports = Bot;

@@ -1,36 +1,39 @@
-const { MessageEmbed, Interaction, Client, CommandInteraction } = require('discord.js');
+const { CommandInteraction } = require("discord.js");
 const Command = require("../../classes/Command.js");
-const Bot = require("../../classes/Bot.js")
-
-const JSONdb = require('simple-json-db');
-const db = new JSONdb('./welcomedb.json');
+const Bot = require("../../classes/Bot.js");
+const { writeFileSync } = require("fs");
 
 class WelcomeCommand extends Command {
-    constructor(client) {
-        super(client, {
-            name:"welcome",
-            description:"Disables/Enables welcome messages for the server.",
-            userAvailable: false,
-        });
-    };
+  constructor(client) {
+    super(client, {
+      name: "welcome",
+      description: "Disables / Enables welcome messages for the server.",
+      userAvailable: false,
+      staffDc: true,
+    });
+  }
 
-    /**
-     *
-     * @param {CommandInteraction} interaction
-     * @param {Bot} client
-     */
+  /**
+   *
+   * @param {CommandInteraction} interaction
+   * @param {Bot} client
+   */
 
-    async run(interaction, client) {
+  async run(interaction, client) {
+    client.config.welcomeMessage = client.config.welcomeMessage ? false : true;
 
-        if(db.get("enabled") === true){
-            db.set("enabled", false);
-            return this.response(interaction, "Ok! I will no longer send welcome messages for this server.");
-        }else{
-            db.set("enabled", "Ok! I will now send welcome messages for this server.");
-        }
+    writeFileSync(
+      "./config/welcomeMessage.json",
+      JSON.stringify(client.config.welcomeMessage)
+    );
 
-
-    }
-};
+    return this.response(
+      interaction,
+      `:white_check_mark: **Welcome Messages:** \`${
+        client.config.welcomeMessage ? "Enabled" : "Disabled"
+      }\``
+    );
+  }
+}
 
 module.exports = WelcomeCommand;

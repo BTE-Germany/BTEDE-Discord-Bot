@@ -1,16 +1,16 @@
-const util = require('minecraft-server-util');
-const RCONServer = require("./RCONServer.js")
+const util = require("minecraft-server-util");
+const RCONServer = require("./RCONServer.js");
 
 class RCON {
-    constructor(hosts) {
-        this.hosts = hosts;
-    };
+  constructor(hosts) {
+    this.hosts = hosts;
+  }
 
-    get Lobby() {
-        if(!this.hosts) throw new TypeError("No hosts in RCON");
-        
-        return new RCONServer(this.hosts?.['lobby']);
-    };
-};
+  get Lobby() {
+    if (!this.hosts) throw new TypeError("No hosts in RCON");
+
+    return new RCONServer(this.hosts?.["lobby"]);
+  }
+}
 
 module.exports = RCON;
