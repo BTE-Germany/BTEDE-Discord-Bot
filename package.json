@@ -6,7 +6,8 @@
   "type": "commonjs",
   "typings": "",
   "scripts": {
-    "dev": "nodemon ./index.js"
+    "dev": "nodemon ./index.js",
+    "test": "node neueAushwahlDingBeiBTEoderSo"
   },
   "author": "",
   "license": "ISC",
