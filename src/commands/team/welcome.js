@@ -6,7 +6,7 @@ const { writeFileSync } = require("fs");
 class WelcomeCommand extends Command {
   constructor(client) {
     super(client, {
-      name: "welcome",
+      name: "welcome-message",
       description: "Disables / Enables welcome messages for the server.",
       userAvailable: false,
       staffDc: true,
