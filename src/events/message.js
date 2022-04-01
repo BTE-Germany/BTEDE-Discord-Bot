@@ -293,53 +293,6 @@ class MessageEvent extends BaseEvent {
       }
     }
 
-    // words
-    let deCheck = wash.check("de", content);
-    let enCheck = wash.check("en", content);
-
-    if (
-      (deCheck === true || enCheck === true) &&
-      !msg.member.roles.cache.get(client.config.roles.team)
-    ) {
-      await msg.delete();
-
-      let log = await client.channels.fetch(client.config.channels.chatlog);
-      if (log)
-        log.send({
-          embeds: [
-            new MessageEmbed()
-              .setColor("#ff0000")
-              .setTimestamp()
-              .setFooter(msg.guild.name, msg.guild.iconURL({ dynamic: true }))
-              .setTitle(":wastebasket: Message Deleted")
-              .addFields([
-                {
-                  name: "👤 User",
-                  value: `<@!${msg.author.id}> (${msg.author.tag})`,
-                  inline: true,
-                },
-                {
-                  name: "⏰ Timestamp",
-                  value: `<t:${Math.round(
-                    msg.createdTimestamp / 1000
-                  )}:f> (<t:${Math.round(msg.createdTimestamp / 1000)}:R>)`,
-                  inline: true,
-                },
-                {
-                  name: "💬 Message",
-                  value: `\`${msg.content}\``,
-                },
-              ])
-              .setAuthor({
-                name: msg.author.username,
-                iconURL: msg.author.avatarURL({ dynamic: true }),
-              }),
-          ],
-        });
-
-      return;
-    }
-
     // suggestions
     if (msg.channel.id === client.config.channels.suggestions) {
       if (msg.author.bot) return;
