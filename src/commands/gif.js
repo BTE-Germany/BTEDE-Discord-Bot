@@ -31,6 +31,10 @@ module.exports = class extends Command {
               name: "measure",
               value: "measure",
             },
+            {
+              name: "ram",
+              value: "ram",
+            },
           ],
         },
       ],
@@ -56,6 +60,8 @@ module.exports = class extends Command {
       gifLink = "https://imgur.com/9Arqjau";
     } else if (gif === "measure") {
       gifLink = "https://gyazo.com/d58446cec35cc504bb36b749346041a9";
+    } else if (gif === "ram") {
+      gifLink = "https://media.nachwahl.dev/FmtvIo.gif";
     }
 
     return await this.response(interaction, gifLink);
