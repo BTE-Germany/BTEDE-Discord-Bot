@@ -103,7 +103,6 @@ const help = new MessageEmbed()
       value: "ID: land",
       inline: true,
     }
-        .setEphimeral(true)
   );
 
 module.exports = class extends Command {
