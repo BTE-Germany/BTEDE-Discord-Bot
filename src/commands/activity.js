@@ -146,18 +146,15 @@ module.exports = class extends Command {
     const args = interaction.options.getString("activity");
     //check if user is in a voice channel
     if (args === "help") {
-      interaction.reply(help);
+      this.response(interaction, help);
     }
     if (!interaction.message.member.voice.channel) {
-      interaction.reply(
-        "❌ | You must be in a voice channel to use this command",
-        { ephemeral: true }
+      this.error(interaction,
+        "❌ | You must be in a voice channel to use this command"
       );
     } else {
       if (!args) {
-        interaction.reply("❌ | You must provide an activity ID", {
-          ephemeral: true,
-        });
+        this.error(interaction, "❌ | You must provide an activity ID");
       } else {
         try {
           client.channels.cache
@@ -170,7 +167,7 @@ module.exports = class extends Command {
               targetApplication: args,
             })
             .then((invite) =>
-              interaction.reply(
+              this.response(interaction,
                 `✅ | Invite created! Click here to start: ${invite.url}`
               )
             );
