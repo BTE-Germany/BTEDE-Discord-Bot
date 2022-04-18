@@ -59,11 +59,6 @@ const {
         inline: true,
       },
       {
-        name: "Doodle Crew",
-        value: "ID: doodle",
-        inline: true,
-      },
-      {
         name: "Sketch Heads",
         value: "ID: sketch",
         inline: true,
