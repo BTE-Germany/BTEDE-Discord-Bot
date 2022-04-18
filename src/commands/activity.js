@@ -8,114 +8,103 @@ const Command = require("../classes/Command.js");
 const Bot = require("../classes/Bot.js");
 const IDS = require("./activites.json");
 
-const help = {
-  content: "_ _",
-  embeds: [
+const help = new MessageEmbed()
+  .setColor("#0099ff")
+  .setTitle("Activity")
+  .setDescription("Usage: '/activity <activity>'")
+  .addFields(
     {
-      description: "Usage: /activites [activity]",
-      color: 9174784,
-      fields: [
-        {
-          name: "Help (this embed)",
-          value: "ID: help",
-          inline: true,
-        },
-        {
-          name: "Watch Together",
-          value: "ID: youtube",
-          inline: true,
-        },
-        {
-          name: "Poker Night",
-          value: "ID: poker",
-          inline: true,
-        },
-        {
-          name: "Betrayal.io",
-          value: "ID: betrayal",
-          inline: true,
-        },
-        {
-          name: "Fishington.io",
-          value: "ID: fish",
-          inline: true,
-        },
-        {
-          name: "Chess In The Park",
-          value: "ID: chess",
-          inline: true,
-        },
-        {
-          name: "Sketchy Artist",
-          value: "ID: artist",
-          inline: true,
-        },
-        {
-          name: "ID: Awkword",
-          value: "ID: awkword",
-          inline: true,
-        },
-        {
-          name: "Delete Me Calla",
-          value: "ID: delete",
-          inline: true,
-        },
-        {
-          name: "Doodle Crew",
-          value: "ID: doodle",
-          inline: true,
-        },
-        {
-          name: "Sketch Heads",
-          value: "ID: sketch",
-          inline: true,
-        },
-        {
-          name: "Letter League",
-          value: "ID: letter",
-          inline: true,
-        },
-        {
-          name: "Word Snacks",
-          value: "ID: word",
-          inline: true,
-        },
-        {
-          name: "SpellCast",
-          value: "ID: spell",
-          inline: true,
-        },
-        {
-          name: "Checkers In The Park",
-          value: "ID: checkers",
-          inline: true,
-        },
-        {
-          name: "Blazing 8s",
-          value: "ID: 8s",
-          inline: true,
-        },
-        {
-          name: "Putt Party",
-          value: "ID: putt",
-          inline: true,
-        },
-        {
-          name: "Land-io",
-          value: "ID: land",
-          inline: true,
-        },
-      ],
-      author: {
-        name: "Activities",
-        icon_url:
-          "https://cdn.discordapp.com/emojis/853745991525859338.gif?size=96&quality=lossless",
-      },
+      name: "Help (this embed)",
+      value: "ID: help",
+      inline: true,
     },
-  ],
-  attachments: [],
-  ephemeral: true,
-};
+    {
+      name: "Watch Together",
+      value: "ID: youtube",
+      inline: true,
+    },
+    {
+      name: "Poker Night",
+      value: "ID: poker",
+      inline: true,
+    },
+    {
+      name: "Betrayal.io",
+      value: "ID: betrayal",
+      inline: true,
+    },
+    {
+      name: "Fishington.io",
+      value: "ID: fish",
+      inline: true,
+    },
+    {
+      name: "Chess In The Park",
+      value: "ID: chess",
+      inline: true,
+    },
+    {
+      name: "Sketchy Artist",
+      value: "ID: artist",
+      inline: true,
+    },
+    {
+      name: "ID: Awkword",
+      value: "ID: awkword",
+      inline: true,
+    },
+    {
+      name: "Delete Me Calla",
+      value: "ID: delete",
+      inline: true,
+    },
+    {
+      name: "Doodle Crew",
+      value: "ID: doodle",
+      inline: true,
+    },
+    {
+      name: "Sketch Heads",
+      value: "ID: sketch",
+      inline: true,
+    },
+    {
+      name: "Letter League",
+      value: "ID: letter",
+      inline: true,
+    },
+    {
+      name: "Word Snacks",
+      value: "ID: word",
+      inline: true,
+    },
+    {
+      name: "SpellCast",
+      value: "ID: spell",
+      inline: true,
+    },
+    {
+      name: "Checkers In The Park",
+      value: "ID: checkers",
+      inline: true,
+    },
+    {
+      name: "Blazing 8s",
+      value: "ID: 8s",
+      inline: true,
+    },
+    {
+      name: "Putt Party",
+      value: "ID: putt",
+      inline: true,
+    },
+    {
+      name: "Land-io",
+      value: "ID: land",
+      inline: true,
+    }
+        .setEphimeral(true)
+  );
 
 module.exports = class extends Command {
   constructor(client) {
@@ -149,7 +138,8 @@ module.exports = class extends Command {
       this.response(interaction, help);
     }
     if (!interaction.message.member.voice.channel) {
-      this.error(interaction,
+      this.error(
+        interaction,
         "You must be in a voice channel to use this command"
       );
     } else {
@@ -167,12 +157,14 @@ module.exports = class extends Command {
               targetApplication: args,
             })
             .then((invite) =>
-              this.response(interaction,
+              this.response(
+                interaction,
                 `✅ | Invite created! Click here to start: ${invite.url}`
               )
             );
         } catch (error) {
-          this.error(interaction,
+          this.error(
+            interaction,
             "An error occurred while creating the invite! Did you provide a valid activity ID?"
           );
         }
