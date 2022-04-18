@@ -118,7 +118,6 @@ const help = {
 };
 
 module.exports = class extends Command {
-<<<<<<< HEAD
   constructor(client) {
     super(client, {
       name: "activity",
@@ -134,23 +133,6 @@ module.exports = class extends Command {
       userAvailable: true,
     });
   }
-=======
-    constructor(client) {
-        super(client, {
-            name: "activity",
-            description: "Start an activity in your voice channel",
-            options: [
-                {
-                    name: "activity",
-                    description: "The ID of the activity to start",
-                    type: "string",
-                    required: true,
-                },
-            ],
-            userAvailable: true,
-        });
-    }
->>>>>>> a5fe709cc88014691b0e16b9bfaaf3bf55202f03
 
   /**
    *
@@ -158,13 +140,13 @@ module.exports = class extends Command {
    * @param {Bot} client
    */
 
-<<<<<<< HEAD
   async run(interaction, client) {
     if (!interaction.isCommand()) return;
     const options = interaction.options;
     const args = interaction.options.getString("activity");
     //check if user is in a voice channel
     if (args === "help") {
+      interaction.send(help);
     }
     if (!interaction.message.member.voice.channel) {
       interaction.reply(
@@ -191,31 +173,14 @@ module.exports = class extends Command {
               interaction.reply(
                 `✅ | Invite created! Click here to start: ${invite.url}`
               )
-=======
-    async run(interaction, client) {
-        if(!interaction.isCommand) return;
-        const options = interaction.options;
-        const args = options.data;
-        //check if user is in a voice channel
-        if(args.activity === "help"){
-            interaction.reply(help)
-        }
-        if (!interaction.message.member.voice.channel) {
-            interaction.reply(
-                "❌ | You must be in a voice channel to use this command", {ephemeral: true}
->>>>>>> a5fe709cc88014691b0e16b9bfaaf3bf55202f03
             );
-        } catch (e) {
+        } catch (error) {
           interaction.reply(
-            "❌ | An error occured while creating the invite. Did you provide a valid ID?",
+            "❌ | An error occurred while creating the invite",
             { ephemeral: true }
           );
         }
       }
     }
-<<<<<<< HEAD
   }
 };
-=======
-    }
->>>>>>> a5fe709cc88014691b0e16b9bfaaf3bf55202f03
