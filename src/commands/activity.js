@@ -49,7 +49,7 @@ const {
         inline: true,
       },
       {
-        name: "ID: Awkword",
+        name: "Awkword",
         value: "ID: awkword",
         inline: true,
       },
