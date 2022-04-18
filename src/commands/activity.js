@@ -134,7 +134,7 @@ const {
       const args = interaction.options.getString("activity");
       //check if user is in a voice channel
       if (args === "help") {
-        this.response(interaction, help);
+        return this.response(interaction, help);
       }
       if (!interaction.member.voice.channel) {
         this.error(
