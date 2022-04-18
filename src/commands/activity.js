@@ -126,7 +126,7 @@ module.exports = class extends Command {
         {
           name: "activity",
           description: "The ID of the activity to start",
-          type: "string",
+          type: 3,
           required: true,
         },
       ],
@@ -146,7 +146,7 @@ module.exports = class extends Command {
     const args = interaction.options.getString("activity");
     //check if user is in a voice channel
     if (args === "help") {
-      interaction.send(help);
+      interaction.reply(help);
     }
     if (!interaction.message.member.voice.channel) {
       interaction.reply(
