@@ -176,7 +176,7 @@ module.exports = class extends Command {
             );
         } catch (error) {
           interaction.reply(
-            "❌ | An error occurred while creating the invite",
+            "❌ | An error occurred while creating the invite! Did you provide a valid activity ID?",
             { ephemeral: true }
           );
         }
