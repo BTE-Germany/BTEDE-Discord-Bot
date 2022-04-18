@@ -150,11 +150,11 @@ module.exports = class extends Command {
     }
     if (!interaction.message.member.voice.channel) {
       this.error(interaction,
-        "❌ | You must be in a voice channel to use this command"
+        "You must be in a voice channel to use this command"
       );
     } else {
       if (!args) {
-        this.error(interaction, "❌ | You must provide an activity ID");
+        this.error(interaction, "You must provide an activity ID");
       } else {
         try {
           client.channels.cache
@@ -172,9 +172,8 @@ module.exports = class extends Command {
               )
             );
         } catch (error) {
-          interaction.reply(
-            "❌ | An error occurred while creating the invite! Did you provide a valid activity ID?",
-            { ephemeral: true }
+          this.error(interaction,
+            "An error occurred while creating the invite! Did you provide a valid activity ID?"
           );
         }
       }
