@@ -7,7 +7,7 @@ const {
 const Command = require("../../classes/Command.js");
 const Bot = require("../../classes/Bot.js");
 
-class WarnCommand extends Command {
+class dutyCommand extends Command {
   constructor(client) {
     super(client, {
       name: "duty",
