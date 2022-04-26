@@ -40,4 +40,4 @@ class WarnCommand extends Command {
   }
 }
 
-module.exports = WarnCommand;
+module.exports = dutyCommand;
