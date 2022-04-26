@@ -49,18 +49,8 @@ const {
         inline: true,
       },
       {
-        name: "ID: Awkword",
-        value: "ID: awkword",
-        inline: true,
-      },
-      {
         name: "Delete Me Calla",
         value: "ID: delete",
-        inline: true,
-      },
-      {
-        name: "Doodle Crew",
-        value: "ID: doodle",
         inline: true,
       },
       {
