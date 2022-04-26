@@ -24,19 +24,21 @@ class WarnCommand extends Command {
      */
 
     async run(interaction, client) {
-        const user = interaction.member;
+        
+const user = interaction.member;
+const guild = client.guilds.cache.get(client.config.guild);
+const member = guild.members.cache.get(user.id);
 
-        if(client.guilds.cache.get(client.config.guild).members.cache.get(user.id).roles.cache.has(client.config.roles.duty) && client.guilds.cache.get(client.config.guild).members.cache.get(user.id).roles.cache.has(client.config.roles.support)){
-            this.response(interaction, "You are now __not__ on duty!");
-            return
-        }
-        if(client.guilds.cache.get(client.config.guild).members.cache.get(user.id).roles.cache.has(client.config.roles.support) || client.guilds.cache.get(client.config.staffDc.id).members.cache.get(user.id).roles.cache.has(client.config.roles.supports) ) {
-            this.response(interaction, "You are now __on duty__!");
-            return;
-        }else{
-            this.error(interaction, "You are not a support member! You can't get on duty!");
-        }
-    }
+if(!member.roles.cache.get(client.config.roles.support)) return this.error("You are not a support member! You can't get on duty!");
+
+if(member.roles.cache.has(client.config.roles.duty)) {
+  await member.roles.remove(client.config.roles.duty);
+  return this.response(interaction, "You are now __not__ on duty!");
+} else {
+  await member.roles.add(client.config.roles.duty);
+  return this.response(interaction, "You are now __on duty__!");
+}
+
 }
 
 module.exports = WarnCommand;
