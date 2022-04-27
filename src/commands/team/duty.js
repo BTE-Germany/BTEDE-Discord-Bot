@@ -28,7 +28,7 @@ class dutyCommand extends Command {
     const member = guild.members.cache.get(user.id);
 
     if (!member.roles.cache.get(client.config.roles.support))
-      return this.error("You are not a support member! You can't get on duty!");
+      return this.error(interaction, "You are not a support member! You can't get on duty!");
 
     if (member.roles.cache.has(client.config.roles.duty)) {
       await member.roles.remove(client.config.roles.duty);
