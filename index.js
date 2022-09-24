@@ -15,15 +15,10 @@
   });
 
   const mongoose = require("mongoose");
-
-  const mongo = client.config.mongo;
-  const connection = await mongoose.connect(
-    `mongodb://${mongo.user}:${encodeURIComponent(mongo.password)}@${
-      mongo.host
-    }/${mongo.database}?ssl=false`,
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  );
-  client.connection = connection;
+  client.connection = await mongoose.connect(client.config.mongo.string, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 
   const {
     registerEvents,
@@ -37,6 +32,5 @@
 
   await client.login(client.config.BOT_TOKEN);
 
-  require("./webAPI.js")(client);
-  require("./messageUpdateAPI.js")(client);
+  require("./src/messageUpdateAPI.js")(client);
 })();
