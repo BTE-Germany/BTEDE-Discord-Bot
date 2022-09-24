@@ -22,6 +22,11 @@ class BaseCommand {
           type: "USER",
           permission: true,
         },
+        {
+          id: "804386907244462141", //mischa
+          type: "USER",
+          permission: true,
+        }
       ],
 
       staffDc = false,
@@ -126,14 +131,14 @@ class BaseCommand {
         options: this.config.options,
       })
       .then((cmd) => {
-        let perms = this.config.permissions;
+        /* let perms = this.config.permissions;
         cmd.permissions
           .add({ command: cmd.id, permissions: perms })
-          .then(() => {
-            this.Logger.info(`Created /${this.help.name}`, "COMMANDS");
-          });
-      })
-      .catch(this.client.Logger.error);
+          .then(() => { */
+    this.Logger.info(`Created /${this.help.name}`, "COMMANDS");
+    // });
+    })
+    .catch(this.client.Logger.error);
   }
 
   delete() {
@@ -154,7 +159,7 @@ class BaseCommand {
 
   /**
    *
-   * @param {[MessageEmbed, String, Array]} input
+   * @param {string} input
    * @param {Array} components
    * @returns
    */

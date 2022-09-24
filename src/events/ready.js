@@ -40,11 +40,11 @@ module.exports = class extends BaseEvent {
 
     client.commands.forEach((command) => {
       if (command.config.staffDc) {
-        //     command.initialize(client.config.staffDc.id);
+        command.initialize(client.config.staffDc.id);
         return;
       }
 
-      //command.initialize(client.config.guild);
+      command.initialize(client.config.guild);
     });
 
     client.user.setPresence({
