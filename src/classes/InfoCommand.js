@@ -44,7 +44,7 @@ module.exports = class InfoCommand extends BaseCommand {
     if (args[0]?.value === "en" || args[0]?.value === "lang_en")
       language = "en";
 
-    let url = `https://bteg-backend.nachwahl.dev/items/botmessages/${language}_${this.help.name}`;
+    let url = `https://cms.bte-germany.de/items/botmessages/${language}_${this.help.name}`;
     let response = await axios({
       method: "get",
       url: url,
