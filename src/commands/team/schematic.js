@@ -36,26 +36,25 @@ class schematicCommand extends Command {
 
   async run(interaction, client) {
     const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value;
-    const terra = await client.config.status.find((x) => x.id === terraname);
     const name = crypto.randomUUID();
     const schemfile = await interaction.options._hoistedOptions.find((o) => o.name === "schematic").attachment;
 
     if(!schemfile) return this.error(interaction, "Please provide a valid schematic!");
     if(!schemfile.name.endsWith(".schematic")) return this.error(interaction, "Please provide the schematic in the form of a schematic!");
-    await axios.post(
-      terra.ip + ":" + terra.schemport + "/api/schematic",
+    await axios.post("http://cloud.bte.ger:45655/api/schematics/",
       {
         name: name,
-        url: schemfile.url
+        url: schemfile.url,
+        terra: terraname.replace(" ", "-"),
       }
     ).then(
-      () => {
-        this.response(interaction, `Successfully uploaded the schematic to ${terra.id} as ${name}.schematic`);
+      (res) => {
+        return this.response(interaction, `Successfully uploaded the schematic to ${res.data.server} as ${res.data.fileName}.schematic`);
       }
     ).catch(
       (e) => {
         console.log(e.message);
-        this.error(interaction, `Failed to upload the schematic to ${terra.id}!`);
+        return this.error(interaction, `Failed to upload the schematic to ${terraname}!`);
       }
     )
   }
