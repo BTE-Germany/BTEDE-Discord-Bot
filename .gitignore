@@ -1,9 +1,9 @@
 config/
+.idea/
 secret.json
 *.sqlite
 node_modules/
 lang/
-messageUpdateAPI.js
 webAPI.js
 neueAushwahlDingBeiBTEoderSo.js
 package-lock.json
