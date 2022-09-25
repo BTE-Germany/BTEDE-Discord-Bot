@@ -43,7 +43,7 @@ class schematicCommand extends Command {
     if(!schemfile) return this.error(interaction, "Please provide a valid schematic!");
     if(!schemfile.name.endsWith(".schematic")) return this.error(interaction, "Please provide the schematic in the form of a schematic!");
     await axios.post(
-      terra.ip + ":8080/api/schematic",
+      terra.ip + ":" + terra.schemport + "/api/schematic",
       {
         name: name,
         url: schemfile.url
