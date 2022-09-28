@@ -76,7 +76,7 @@ class schematicCommand extends Command {
       if (!schemfile.name.endsWith(".schematic")) return this.error(interaction, "Please provide the schematic in the form of a schematic!");
 
       console.log(schemfile.url);
-      await axios.post("http://localhost:45655/api/schematics/upload",
+      await axios.post("http://cloud.bte.ger:45655/api/schematics/upload",
         {
           "url": schemfile.url,
           "terra": terraname.replace(" ", "-"),
