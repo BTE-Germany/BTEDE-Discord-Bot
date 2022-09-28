@@ -56,8 +56,8 @@ class schematicCommand extends Command {
 
   async run(interaction, client) {
     const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value;
-
-    if(interaction.options._hoistedOptions.find((x) => x.name === "upload" === undefined)) {
+   
+    if(!(interaction.options._hoistedOptions.find((x) => x.name === "schematic"))) {
       await axios.get(`http://cloud.bte.ger:45655/api/schematics/list?terra=${terraname.replace(" ", "-")}`).then(
         (res) => {
           return this.response(interaction, `Schematics on ${terraname}: \n` + "```" + res.data.join("\n").toString().replace(".schematic", "") + "```");
