@@ -16,7 +16,7 @@ const steps = [
   "referenceImages",
   "coordinates",
 ];
-const wash = require("washyourmouthoutwithsoap");
+// const wash = require("washyourmouthoutwithsoap");
 
 function generateDesc(titles, title) {
   let desc = "";
@@ -211,11 +211,10 @@ class MessageEvent extends BaseEvent {
       }
     }
 
-    // filters
+   /*
     let content = msg.content.toLowerCase();
 
-    // links
-    if (content.includes("http://") || content.includes("https://")) {
+if (content.includes("http://") || content.includes("https://")) {
       if (
         (msg.channel.id === client.config.channels.voiceText &&
           !(
@@ -292,6 +291,8 @@ class MessageEvent extends BaseEvent {
         }
       }
     }
+    
+    */
 
     // suggestions
     if (msg.channel.id === client.config.channels.suggestions) {
