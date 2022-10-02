@@ -70,7 +70,7 @@ async function registerInfoCommands(client, dir = "") {
       }).catch((e) => {
         throw new Error(e);
       }).then((response) => {
-        const cmd = new InfoCommand(client, infoCommand, response.data.title);
+        const cmd = new InfoCommand(client, infoCommand, response.data.data.title);
         client.commands.set(cmd.help.name, cmd);
       })
     } catch (error) {
