@@ -42,7 +42,7 @@ class citamehcsCommand extends Command {
         return interaction.editReply("!og uoy ereH", { files: [schem] });
       })
       .catch(async (e) => {
-        await interaction.editReply("Schematic not found");
+        await this.error(interaction, "Schematic not found");
         return console.log(e);
       })
   }
