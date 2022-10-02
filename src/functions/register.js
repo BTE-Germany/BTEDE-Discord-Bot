@@ -57,30 +57,20 @@ async function registerCommands(client, dir = "") {
  * @param {Bot} client
  * @param {String} dir
  */
-
 async function registerInfoCommands(client, dir = "") {
   let InfoCommand = require("../classes/InfoCommand.js");
   client.config.infoCommands.forEach((infoCommand) => {
     try {
-      let cmdLang = require(`../lang/en/${infoCommand}.json`);
-      if (!cmdLang)
-        throw new TypeError(
-          "No Language files for " +
-            infoCommand +
-            ". " +
-            "Searching for " +
-            `../lang/en/${infoCommand}.json`
-        );
-      if (!cmdLang["t"])
-        throw new TypeError(
-          "No TITLE in language file for " + infoCommand + "."
-        );
-      if (!cmdLang["d"])
-        throw new TypeError(
-          "No DESCRIPTION in language file for " + infoCommand + "."
-        );
-      const cmd = new InfoCommand(client, infoCommand, cmdLang["t"]);
-      client.commands.set(cmd.help.name, cmd);
+      let url = `https://cms.bte-germany.de/items/botmessages/en_${infoCommand}`;
+      axios({
+        method: "get",
+        url: url,
+      }).catch((e) => {
+        throw new Error(e);
+      }).then((response) => {
+        const cmd = new InfoCommand(client, infoCommand, response.data.title);
+        client.commands.set(cmd.help.name, cmd);
+      })
     } catch (error) {
       console.log(error);
       throw new TypeError("No Language files for " + infoCommand + ".");
