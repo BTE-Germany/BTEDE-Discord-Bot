@@ -63,6 +63,7 @@ async function registerInfoCommands(client, dir = "") {
   client.config.infoCommands.forEach((infoCommand) => {
     try {
       let url = `https://cms.bte-germany.de/items/botmessages/en_${infoCommand}`;
+      console.log(url);
       axios({
         method: "get",
         url: url,
