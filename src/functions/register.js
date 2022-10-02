@@ -64,10 +64,7 @@ async function registerInfoCommands(client, dir = "") {
     try {
       let url = `https://cms.bte-germany.de/items/botmessages/en_${infoCommand}`;
       console.log(url);
-      axios({
-        method: "get",
-        url: url,
-      }).catch((e) => {
+      axios.get(url).catch((e) => {
         throw new Error(e);
       }).then((response) => {
         const cmd = new InfoCommand(client, infoCommand, response.data.data.title);
