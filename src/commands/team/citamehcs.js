@@ -1,4 +1,4 @@
-const { CommandInteraction } = require("discord.js");
+const { CommandInteraction, MessageAttachment } = require("discord.js");
 const Command = require("../../classes/Command.js");
 const axios = require("axios");
 const Bot = require("../../classes/Bot.js");
@@ -37,9 +37,10 @@ class citamehcsCommand extends Command {
     const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value;
     const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
 
-    await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name.toLowerCase()}`, { responseType: "stream"})
+    await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name.toLowerCase()}`, { responseType: "arraybuffer"})
       .then(async (schem) => {
-        return interaction.editReply("!og uoy ereH", { files: [schem] });
+        const attachment = new MessageAttachment(schem, name+'.schematic')
+        return interaction.editReply("!og uoy ereH", { files: [attachment] });
       })
       .catch(async (e) => {
         await this.error(interaction, "Schematic not found");
