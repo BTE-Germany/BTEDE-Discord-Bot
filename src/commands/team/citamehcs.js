@@ -38,9 +38,11 @@ class citamehcsCommand extends Command {
     const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
 
     await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name.toLowerCase()}`, { responseType: "arraybuffer"})
-      .then(async (schem) => {
-        const attachment = new MessageAttachment(schem, name+'.schematic')
-        return interaction.editReply("!og uoy ereH", { files: [attachment] });
+      .then(async ({data: schem}) => {
+        console.log(schem)
+        const attachment = new MessageAttachment(schem, name+'.schematic');
+        await interaction.editReply("!og uoy ereH");
+        return client.channels.cache.get(interaction.channelId).send({content: null, files: [attachment]});
       })
       .catch(async (e) => {
         await this.error(interaction, "Schematic not found");
