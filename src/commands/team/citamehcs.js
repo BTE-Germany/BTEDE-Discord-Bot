@@ -37,7 +37,7 @@ class citamehcsCommand extends Command {
     const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value;
     const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
 
-    await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name.toLowerCase()}`, { responseType: "arraybuffer"})
+    await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name}`, { responseType: "arraybuffer"})
       .then(async ({data: schem}) => {
         console.log(schem)
         const attachment = new MessageAttachment(schem, name+'.schematic');
