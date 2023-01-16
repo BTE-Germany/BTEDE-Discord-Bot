@@ -26,12 +26,12 @@ class GuildMemberAddEvent extends BaseEvent {
     await member.user.fetch();
 
     // log
-    let joinLog = await client.channels
+    /* let joinLog = await client.channels
       .fetch(client.config.channels.linklog)
       .catch((e) => {
         console.error("Critical Error: Couldnt load join log!");
       });
-    if (joinLog)
+     if (joinLog)
       joinLog.send({
         embeds: [
           new MessageEmbed()
@@ -43,7 +43,7 @@ class GuildMemberAddEvent extends BaseEvent {
             .setDescription(`<@!${member.user.id}> (${member.user.tag})`)
             .setTitle("📈 New User"),
         ],
-      });
+      }); */
 
     // mute
     let c = await client.schemas.case.findOne({
