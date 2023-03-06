@@ -30,7 +30,6 @@ class citamehcsCommand extends Command {
 
         await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name}`, {responseType: "arraybuffer"})
             .then(async ({data: schem}) => {
-                console.log(schem)
                 const attachment = new MessageAttachment(schem, name + '.schematic');
                 await interaction.editReply("!og uoy ereH");
                 return client.channels.cache.get(interaction.channelId).send({content: null, files: [attachment]});
