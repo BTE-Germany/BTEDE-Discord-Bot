@@ -65,8 +65,6 @@ class schematicCommand extends Command {
 
             if (!schemfile) return this.error(interaction, "Please provide a valid schematic!");
             if (!schemfile.name.endsWith(".schematic")) return this.error(interaction, "Please provide the schematic in the form of a schematic!");
-
-            console.log(schemfile.url);
             await axios.post("http://cloud.bte.ger:45655/api/schematics/upload", {
                 "url": schemfile.url, "terra": terraname.replace(" ", "-"),
             }).then((res) => {
@@ -82,7 +80,6 @@ class schematicCommand extends Command {
 
             await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name}`, {responseType: "arraybuffer"})
                 .then(async ({data: schem}) => {
-                    console.log(schem)
                     const attachment = new MessageAttachment(schem, name + '.schematic');
                     await interaction.editReply("Here you go!");
                     return client.channels.cache.get(interaction.channelId).send({content: null, files: [attachment]});
