@@ -134,11 +134,6 @@ module.exports = class extends BaseEvent {
         return await interaction.message.delete().catch(client.Logger.warn);
       }
 
-      if (buttonName === "platform") {
-        if (data.platform === "java") data.platform = "bedrock";
-        else data.platform = "java";
-      }
-
       if (buttonName === "onward") {
         if (data.onward === true) data.onward = false;
         else data.onward = true;
@@ -324,7 +319,6 @@ module.exports = class extends BaseEvent {
         ]),
       ];
 
-      if (buttonName != "platform") {
         selectRow.forEach(async (row) => {
           row.components.forEach((component) => {
             // pressed button turns blue
@@ -342,7 +336,6 @@ module.exports = class extends BaseEvent {
               component.setStyle("SECONDARY");
           });
         });
-      }
 
       //   await interaction.reply({ content: `Write the value for \`${buttonName}\` now.`, ephemeral: false }).catch(client.Logger.warn);
       await interaction.deferUpdate().catch(client.Logger.warn);
