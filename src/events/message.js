@@ -132,6 +132,12 @@ class MessageEvent extends BaseEvent {
         (x) => x.channel === msg.channel.id && x.mod === msg.author.id
       );
       if (cData && cData?.step) {
+        let content = msg.content.toUpperCase();
+        if(content = "BEDROCK") cData.platform = "Bedrock"
+        else if (content = "JAVA") cData.platform = "Java"
+        else return msg.reply(":x: This plaform does not exist.");
+      }
+      if (cData && cData?.step) {
         // federal state / trial / rejected
         if (cData.step === "federalState") {
           let content = msg.content.toUpperCase();
