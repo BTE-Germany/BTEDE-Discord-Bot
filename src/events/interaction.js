@@ -193,7 +193,11 @@ module.exports = class extends BaseEvent {
 
         if (data.role === "builder" || data.role === "trial") {
           await client.RCON.Lobby.connect();
+          if(data.platform === "Java") {
           client.RCON.Lobby.run(`whitelist add ${data.uuid}`, true);
+          } else if(data.platform = "Bedrock") {
+            client.RCON.Lobby.run(`fwhitelist add ${data.minecraft}`)
+          }
           client.RCON.Lobby.run(`lp user ${data.uuid} parent set ${data.role}`);
 
           let member =

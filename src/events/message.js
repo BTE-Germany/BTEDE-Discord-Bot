@@ -167,18 +167,21 @@ class MessageEvent extends BaseEvent {
           });
         }
         else if(cData.plaftorm === "Bedrock") {
-          let uuid = await axios
+          let xuid = await axios
             .get(
               `https://api.geysermc.org/v2/xbox/xuid${msg.content.trim()}`
             )
             .catch(client.Logger.warn);
-          if (!uuid || !uuid?.data || !uuid?.data?.xuid)
+          if (!xuid || !xuid?.data || !xuid?.data?.xuid)
               return msg
                 .reply(":x: Couldn't find this mincraft account.")
                 .catch(client.Logger.warn);
-          cData.uuid = uuid.data.xuid;
+          
+          let realxuid = xuid.data.xuid.toString();
+          let uuid = `00000000-0000-0000-${realxuid.substring(0, 4)}-${realxuid.substring(5, -1)}`;
+          cData.uuid = uuid;
           msg.channel.send({
-            content: `https://mc-heads.net/body/${uuid?.data?.id}/`
+            content: `https://mc-heads.net/body/${realxuid}/`
           });
         }
         else {
