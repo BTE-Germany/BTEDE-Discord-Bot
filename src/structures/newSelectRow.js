@@ -6,7 +6,7 @@ module.exports = [
       .setDisabled(false)
       .setLabel("Java / Bedrock")
       .setCustomId("cp_platform")
-      .setStyle("SUCCESS"),
+      .setStyle("SECONDARY"),
 
     new MessageButton()
       .setDisabled(false)
