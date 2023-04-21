@@ -169,12 +169,12 @@ class MessageEvent extends BaseEvent {
         else if(cData.platform === "Bedrock") {
           let xuid = await axios
             .get(
-              `https://api.geysermc.org/v2/xbox/xuid${msg.content.trim()}`
+              `https://api.geysermc.org/v2/xbox/xuid/${msg.content.trim()}`
             )
             .catch(client.Logger.warn);
           if (!xuid || !xuid?.data || !xuid?.data?.xuid)
               return msg
-                .reply(":x: Couldn't find this mincraft account.")
+                .reply(":x: Couldn't find this minecraft account.")
                 .catch(client.Logger.warn);
           
           let realxuid = xuid.data.xuid.toString();
