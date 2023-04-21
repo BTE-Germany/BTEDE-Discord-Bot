@@ -166,7 +166,7 @@ class MessageEvent extends BaseEvent {
             content: `https://crafatar.com/renders/body/${uuid?.data?.id}?overlay=true `,
           });
         }
-        else if(cData.plaftorm === "Bedrock") {
+        else if(cData.plaftform === "Bedrock") {
           let xuid = await axios
             .get(
               `https://api.geysermc.org/v2/xbox/xuid${msg.content.trim()}`
