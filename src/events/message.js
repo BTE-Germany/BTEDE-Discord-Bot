@@ -149,6 +149,7 @@ class MessageEvent extends BaseEvent {
 
         // minecraft name lookup
         if (cData.step === "minecraft") {
+          if(cData.platform === "Java") {
           if (!/^[A-Za-z0-9_]{3,16}$/gm.test(msg.content))
             return msg.reply(":x: This is not a valid minecraft username.");
           let uuid = await axios
@@ -165,6 +166,26 @@ class MessageEvent extends BaseEvent {
             content: `https://crafatar.com/renders/body/${uuid?.data?.id}?overlay=true `,
           });
         }
+        else if(cData.plaftorm === "Bedrock") {
+          let uuid = await axios
+            .get(
+              `https://api.geysermc.org/v2/xbox/xuid${msg.content.trim()}`
+            )
+            .catch(client.Logger.warn);
+          if (!uuid || !uuid?.data || !uuid?.data?.xuid)
+              return msg
+                .reply(":x: Couldn't find this mincraft account.")
+                .catch(client.Logger.warn);
+          cData.uuid = uuid.data.xuid;
+          msg.channel.send({
+            content: `https://mc-heads.net/body/${uuid?.data?.id}/`
+          });
+        }
+        else {
+          msg.reply(":x: You have not selected a platform.")
+        }
+        }
+      
 
         cData[cData.step] = msg.content;
 
