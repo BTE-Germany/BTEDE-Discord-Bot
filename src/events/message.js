@@ -166,7 +166,7 @@ class MessageEvent extends BaseEvent {
             content: `https://crafatar.com/renders/body/${uuid?.data?.id}?overlay=true `,
           });
         }
-        else if(cData.plaftform === "Bedrock") {
+        else if(cData.platform === "Bedrock") {
           let xuid = await axios
             .get(
               `https://api.geysermc.org/v2/xbox/xuid${msg.content.trim()}`
@@ -185,7 +185,7 @@ class MessageEvent extends BaseEvent {
           });
         }
         else {
-          msg.reply(":x: You have not selected a platform.")
+          return msg.reply(":x: You have not selected a platform.")
         }
         }
       
