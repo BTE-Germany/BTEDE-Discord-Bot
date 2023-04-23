@@ -80,7 +80,7 @@ class schematicCommand extends Command {
 
             await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name}`, {responseType: "arraybuffer"})
                 .then(async ({data: schem}) => {
-                    let {data: filetype} = axios.get(`http://cloud.bte.ger:45655/api/schematics/filetype?terra=${terraname.replace(" ", "-")}&name=${name}`);
+                    let {data: filetype} = await axios.get(`http://cloud.bte.ger:45655/api/schematics/filetype?terra=${terraname.replace(" ", "-")}&name=${name}`);
                     const attachment = new MessageAttachment(schem, name + filetype);
                     await interaction.editReply("Here you go!");
                     return client.channels.cache.get(interaction.channelId).send({content: null, files: [attachment]});
