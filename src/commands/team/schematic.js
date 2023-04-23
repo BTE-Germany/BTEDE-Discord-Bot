@@ -52,7 +52,7 @@ class schematicCommand extends Command {
         function chunkify(dat, size) {
             var chunks = [];
             dat.reduce((chuckStr, word, i, a) => {
-              var pageIndex = `Seite ${(chunks.length + 1)} \n`;
+              var pageIndex = `--- Seite ${(chunks.length + 1)} --- \n \n`;
               if ((chuckStr.length + word.length + pageIndex.length) > size) {
                 chunks.push(pageIndex + chuckStr);
                 chuckStr = word;
