@@ -51,9 +51,8 @@ class schematicCommand extends Command {
     async run(interaction, client) {
         function chunkify(dat, size) {
             var chunks = [];
-            var possiblePages = Math.ceil(dat.length / size).toString();
             dat.reduce((chuckStr, word, i, a) => {
-              var pageIndex = (chunks.length + 1) + '/' + possiblePages + ' ';
+              var pageIndex = `Seite ${(chunks.length + 1)} \n`;
               if ((chuckStr.length + word.length + pageIndex.length) > size) {
                 chunks.push(pageIndex + chuckStr);
                 chuckStr = word;
