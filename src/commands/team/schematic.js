@@ -4,6 +4,24 @@ const axios = require("axios");
 const Bot = require("../../classes/Bot.js");
 const crypto = require("crypto");
 
+function chunkify(dat, size) {
+    var chunks = [];
+    var possiblePages = Math.ceil(dat.length / size).toString();
+    dat.reduce((chuckStr, word, i, a) => {
+      var pageIndex = ' ' + (chunks.length + 1) + '/';
+      if ((chuckStr.length + word.length + pageIndex.length + possiblePages.length) + 1 > size) {
+        chunks.push(chuckStr + pageIndex);
+        chuckStr = word;
+      } else if (i === a.length - 1) {
+        chunks.push(chuckStr + " " + word + pageIndex);
+      }else {
+        chuckStr += " " + word;
+      }
+      return chuckStr
+    }, '');
+    return chunks.map(chunk => chunk + chunks.length.toString())
+  }
+
 class schematicCommand extends Command {
     constructor(client) {
         super(client, {
@@ -53,7 +71,11 @@ class schematicCommand extends Command {
 
         if (interaction.options.getSubcommand() === "list") {
             await axios.get(`http://cloud.bte.ger:45655/api/schematics/list?terra=${terraname.replace(" ", "-")}`).then((res) => {
-                return this.response(interaction, `Schematics on ${terraname}: \n` + "```" + res.data.join("\n").toString().replace(".schematic", "") + "```");
+                let dat = res.data.map(a => {
+                    return a.replace(".schematic", "").replace(".schem", "");
+                });
+                let chunks = chunkify(dat, 1500);
+                return this.response(interaction, `Schematics on ${terraname}: \n` + "```" + chunks[0].join("\n").toString() + "```");
             }).catch((e) => {
                 console.log(e.message);
                 return this.error(interaction, `Failed to list schematics on ${terraname}!`);
