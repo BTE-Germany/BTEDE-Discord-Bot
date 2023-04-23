@@ -77,7 +77,7 @@ class schematicCommand extends Command {
                 let chunks = chunkify(dat, 1950);
                 this.response(interaction, `Schematics on ${terraname}:`);
                 chunks.forEach(chunk => {
-                    return client.channels.cache.get(interaction.channelId).send({content: "```" + chunks[0] + "```"});
+                    return client.channels.cache.get(interaction.channelId).send({content: "```" + chunk + "```"});
                 });
             }).catch((e) => {
                 console.log(e.message);
