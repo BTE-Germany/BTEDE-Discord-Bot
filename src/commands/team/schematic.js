@@ -49,11 +49,36 @@ class schematicCommand extends Command {
      */
 
     async run(interaction, client) {
+        function chunkify(dat, size) {
+            var chunks = [];
+            var possiblePages = Math.ceil(dat.length / size).toString();
+            dat.reduce((chuckStr, word, i, a) => {
+              var pageIndex = ' ' + (chunks.length + 1) + '/';
+              if ((chuckStr.length + word.length + pageIndex.length + possiblePages.length) + 1 > size) {
+                chunks.push(chuckStr + pageIndex);
+                chuckStr = word;
+              } else if (i === a.length - 1) {
+                chunks.push(chuckStr + "\n" + word + "\n" + pageIndex);
+              }else {
+                chuckStr += "\n" + word;
+              }
+              return chuckStr
+            }, '');
+            return chunks.map(chunk => chunk + chunks.length.toString())
+          }
+
         const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value;
 
         if (interaction.options.getSubcommand() === "list") {
             await axios.get(`http://cloud.bte.ger:45655/api/schematics/list?terra=${terraname.replace(" ", "-")}`).then((res) => {
-                return this.response(interaction, `Schematics on ${terraname}: \n` + "```" + res.data.join("\n").toString().replace(".schematic", "").replace(".schem", "") + "```");
+                let dat = res.data
+                    .filter(a => a.endsWith(".schematic") || a.endsWith(".schem"))
+                    .map(a => a.replace(".schematic", "").replace(".schem", ""));
+                let chunks = chunkify(dat, 1950);
+                this.response(interaction, `Schematics on ${terraname}:`);
+                chunks.forEach(chunk => {
+                    return client.channels.cache.get(interaction.channelId).send({content: "```" + chunks[0] + "```"});
+                });
             }).catch((e) => {
                 console.log(e.message);
                 return this.error(interaction, `Failed to list schematics on ${terraname}!`);
@@ -62,7 +87,6 @@ class schematicCommand extends Command {
 
         if (interaction.options.getSubcommand() === "upload") {
             const schemfile = await interaction.options._hoistedOptions.find((o) => o.name === "schematic").attachment;
-
             if (!schemfile) return this.error(interaction, "Please provide a valid schematic!");
             if (!(schemfile.name.endsWith(".schematic") || schemfile.name.endsWith(".schem"))) return this.error(interaction, "Please provide the schematic in the form of a schematic!");
             await axios.post("http://cloud.bte.ger:45655/api/schematics/upload", {
