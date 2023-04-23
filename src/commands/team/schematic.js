@@ -53,18 +53,18 @@ class schematicCommand extends Command {
             var chunks = [];
             var possiblePages = Math.ceil(dat.length / size).toString();
             dat.reduce((chuckStr, word, i, a) => {
-              var pageIndex = ' ' + (chunks.length + 1) + '/';
-              if ((chuckStr.length + word.length + pageIndex.length + possiblePages.length) + 1 > size) {
-                chunks.push(chuckStr + pageIndex);
+              var pageIndex = (chunks.length + 1) + '/' + possiblePages + ' ';
+              if ((chuckStr.length + word.length + pageIndex.length) > size) {
+                chunks.push(pageIndex + chuckStr);
                 chuckStr = word;
               } else if (i === a.length - 1) {
-                chunks.push(chuckStr + "\n" + word + "\n" + pageIndex);
-              }else {
-                chuckStr += "\n" + word;
+                chunks.push(pageIndex + chuckStr + '\n' + word);
+              } else {
+                chuckStr += '\n' + word;
               }
-              return chuckStr
+              return chuckStr;
             }, '');
-            return chunks.map(chunk => chunk + chunks.length.toString())
+            return chunks;
           }
 
         const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value;
