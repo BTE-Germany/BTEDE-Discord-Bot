@@ -117,7 +117,7 @@ module.exports = async (
                 {
                   values: [
                     date,
-                    platform === "java" ? "Java" : "Bedrock",
+                    platform,
                     mcname,
                     dctag,
                     creationImages,

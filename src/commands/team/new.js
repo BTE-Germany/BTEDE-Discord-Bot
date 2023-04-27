@@ -90,7 +90,7 @@ class NewCommand extends Command {
       step: null,
       tag: member.user.tag,
       channel: msg.channel.id,
-      platform: "java",
+      platform: null,
       onward: true,
     });
   }
