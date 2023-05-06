@@ -38,7 +38,24 @@ class schematicCommand extends Command {
                 }, {
                     name: "schematic", description: "The schematic to download", type: 3, required: true
                 }]
-            }],
+            }, {
+                name: "transfer", description: "Downloads a schematic", type: 1, options: [{
+                    name: "fromServer",
+                    description: "The terraserver to transfer from",
+                    type: 3,
+                    required: true,
+                    choices: client.config.status.map((s) => ({name: s.id, value: s.id})),
+                }, {
+                    name: "toServer",
+                    description: "The terraserver to transfer to",
+                    type: 3,
+                    required: true,
+                    choices: client.config.status.map((s) => ({name: s.id, value: s.id})),
+                }, {
+                    name: "schematic", description: "The schematic to transfer", type: 3, required: true
+                }]
+            }
+            ]
         });
     }
 
@@ -112,6 +129,23 @@ class schematicCommand extends Command {
                     await this.error(interaction, "Schematic not found");
                     return console.log(e);
                 });
+        }
+
+        if (interaction.options.getSubcommand() === "upload") {
+            const terra1 = await interaction.options._hoistedOptions.find((x) => x.name === "fromServer").value;
+            const terra2 = await interaction.options._hoistedOptions.find((x) => x.name === "toServer").value;
+            const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
+
+            await axios.post("http://cloud.bte.ger:45655/api/schematics/upload", {
+                "terra1": terra1,
+                "terra2": terra2,
+                "name": name
+            }).then((res) => {
+                return this.response(interaction, res.message);
+            }).catch((e) => {
+                console.log(e.message);
+                return this.error(interaction, `Failed to transfer the schematic from ${terra1} to ${terra2}!`);
+            })
         }
     }
 }
