@@ -40,13 +40,13 @@ class schematicCommand extends Command {
                 }]
             }, {
                 name: "transfer", description: "Downloads a schematic", type: 1, options: [{
-                    name: "fromServer",
+                    name: "fromserver",
                     description: "The terraserver to transfer from",
                     type: 3,
                     required: true,
                     choices: client.config.status.map((s) => ({name: s.id, value: s.id})),
                 }, {
-                    name: "toServer",
+                    name: "toserver",
                     description: "The terraserver to transfer to",
                     type: 3,
                     required: true,
@@ -132,8 +132,8 @@ class schematicCommand extends Command {
         }
 
         if (interaction.options.getSubcommand() === "upload") {
-            const terra1 = await interaction.options._hoistedOptions.find((x) => x.name === "fromServer").value;
-            const terra2 = await interaction.options._hoistedOptions.find((x) => x.name === "toServer").value;
+            const terra1 = await interaction.options._hoistedOptions.find((x) => x.name === "fromserver").value;
+            const terra2 = await interaction.options._hoistedOptions.find((x) => x.name === "toserver").value;
             const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
 
             await axios.post("http://cloud.bte.ger:45655/api/schematics/upload", {
