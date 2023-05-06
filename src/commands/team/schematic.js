@@ -83,9 +83,8 @@ class schematicCommand extends Command {
             return chunks;
           }
 
-        const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value || "";
-
         if (interaction.options.getSubcommand() === "list") {
+            const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value || "";
             await axios.get(`http://cloud.bte.ger:45655/api/schematics/list?terra=${terraname.replace(" ", "-")}`).then((res) => {
                 let dat = res.data
                     .filter(a => a.endsWith(".schematic") || a.endsWith(".schem"))
@@ -116,6 +115,7 @@ class schematicCommand extends Command {
         }
 
         if (interaction.options.getSubcommand() === "download") {
+            const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value || "";
             const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
 
             await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name}`, {responseType: "arraybuffer"})
