@@ -131,12 +131,12 @@ class schematicCommand extends Command {
                 });
         }
 
-        if (interaction.options.getSubcommand() === "upload") {
+        if (interaction.options.getSubcommand() === "transfer") {
             const terra1 = await interaction.options._hoistedOptions.find((x) => x.name === "fromserver").value;
             const terra2 = await interaction.options._hoistedOptions.find((x) => x.name === "toserver").value;
             const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
 
-            await axios.post("http://cloud.bte.ger:45655/api/schematics/upload", {
+            await axios.post("http://cloud.bte.ger:45655/api/schematics/transfer", {
                 "terra1": terra1,
                 "terra2": terra2,
                 "name": name
