@@ -83,7 +83,7 @@ class schematicCommand extends Command {
             return chunks;
           }
 
-        const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value;
+        const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value || "";
 
         if (interaction.options.getSubcommand() === "list") {
             await axios.get(`http://cloud.bte.ger:45655/api/schematics/list?terra=${terraname.replace(" ", "-")}`).then((res) => {
