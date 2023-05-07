@@ -141,7 +141,7 @@ class schematicCommand extends Command {
                 "terra2": terra2,
                 "name": name
             }).then((res) => {
-                return this.response(interaction, res.message);
+                return this.response(interaction, res.data.message);
             }).catch((e) => {
                 console.log(e.message);
                 return this.error(interaction, `Failed to transfer the schematic from ${terra1} to ${terra2}!`);
