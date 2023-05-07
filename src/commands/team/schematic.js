@@ -54,7 +54,7 @@ class schematicCommand extends Command {
                 }, {
                     name: "schematic", description: "The schematic to transfer", type: 3, required: true
                 }]
-            } /* , {
+            }, {
                 name: "delete", description: "Deletes a schematic", type: 1, options: [{
                     name: "terra",
                     description: "The terraserver to delete from",
@@ -64,7 +64,7 @@ class schematicCommand extends Command {
                 }, {
                     name: "schematic", description: "The schematic to delete", type: 3, required: true
                 }]
-            } */
+            }
             ]
         });
     }
@@ -158,7 +158,7 @@ class schematicCommand extends Command {
             })
         }
         
-        /* if (interaction.options.getSubcommand() === "delete") {
+        if (interaction.options.getSubcommand() === "delete") {
             const terra = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value;
             const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
 
@@ -171,7 +171,7 @@ class schematicCommand extends Command {
                 console.log(e.message);
                 return this.error(interaction, `Failed to delete the schematic from ${terra}!`);
             })
-        } */
+        }
     }
 }
 
