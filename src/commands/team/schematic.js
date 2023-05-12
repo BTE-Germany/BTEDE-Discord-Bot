@@ -111,6 +111,7 @@ class schematicCommand extends Command {
         }
 
         if (interaction.options.getSubcommand() === "upload") {
+            const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value || "";
             const schemfile = await interaction.options._hoistedOptions.find((o) => o.name === "schematic").attachment;
             if (!schemfile) return this.error(interaction, "Please provide a valid schematic!");
             if (!(schemfile.name.endsWith(".schematic") || schemfile.name.endsWith(".schem"))) return this.error(interaction, "Please provide the schematic in the form of a schematic!");
