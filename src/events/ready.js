@@ -55,7 +55,6 @@ module.exports = class extends BaseEvent {
     let i = 0;
     let statusMessages = [
       "LISTENING_to /help",
-      "PLAYING_on ServerBlaze.eu",
       "PLAYING_on BTE-Germany.de",
     ];
     setInterval(() => {
