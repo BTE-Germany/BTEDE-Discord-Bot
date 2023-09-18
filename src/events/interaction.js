@@ -21,6 +21,7 @@ module.exports = class extends BaseEvent {
    */
 
   async run(client, interaction) {
+    await interaction.member.fetch()
     if (interaction.type === "APPLICATION_COMMAND") {
       let command = client.commands.get(interaction.commandName);
       if (!command)
