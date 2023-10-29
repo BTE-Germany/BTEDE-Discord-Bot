@@ -142,7 +142,8 @@ class schematicCommand extends Command {
                 "url": schemfile.url, "terra": terraname.replace(" ", "-"),
             }).then((res) => {
                 this.response(interaction, `Successfully uploaded the schematic to ${res.data.server} as ${res.data.fileName}.schematic`);
-                return client.channels.cache.get(interaction.channelId).send({content: comment});
+                if(comment.length > 0 ) client.channels.cache.get(interaction.channelId).send({content: "Kommentar: " + comment});
+                return;
             }).catch((e) => {
                 console.log(e.message);
                 return this.error(interaction, `Failed to upload the schematic to ${terraname}!`);
@@ -160,7 +161,7 @@ class schematicCommand extends Command {
                     let {data: filetype} = await axios.get(`http://cloud.bte.ger:45655/api/schematics/filetype?terra=${terraname.replace(" ", "-")}&name=${name}`);
                     const attachment = new MessageAttachment(schem, name + filetype);
                     await interaction.editReply("Here you go!");
-                    return client.channels.cache.get(interaction.channelId).send({content: comment, files: [attachment]});
+                    return client.channels.cache.get(interaction.channelId).send({content: "Kommentar: " + comment, files: [attachment]});
                 })
                 .catch(async (e) => {
                     await this.error(interaction, "Schematic not found");
@@ -181,7 +182,8 @@ class schematicCommand extends Command {
                 "name": name
             }).then((res) => {
                 this.response(interaction, res.data.message);
-                return client.channels.cache.get(interaction.channelId).send({content: comment});
+                if(comment.length > 0 ) client.channels.cache.get(interaction.channelId).send({content: "Kommentar: " + comment});
+                return;
             }).catch((e) => {
                 console.log(e.message);
                 return this.error(interaction, `Failed to transfer the schematic from ${terra1} to ${terra2}!`);
@@ -199,7 +201,8 @@ class schematicCommand extends Command {
                 "name": name
             }).then((res) => {
                 this.response(interaction, res.data.message);
-                return client.channels.cache.get(interaction.channelId).send({content: comment});
+                if(comment.length > 0 ) client.channels.cache.get(interaction.channelId).send({content: "Kommentar: " + comment});
+                return;
             }).catch((e) => {
                 console.log(e.message);
                 return this.error(interaction, `Failed to delete the schematic from ${terra}!`);
