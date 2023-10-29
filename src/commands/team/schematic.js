@@ -133,7 +133,9 @@ class schematicCommand extends Command {
         if (interaction.options.getSubcommand() === "upload") {
             const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value || "";
             const schemfile = await interaction.options._hoistedOptions.find((o) => o.name === "schematic").attachment;
-            const comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value;
+            let comment = "";
+
+            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch {}
             if (!schemfile) return this.error(interaction, "Please provide a valid schematic!");
             if (!(schemfile.name.endsWith(".schematic") || schemfile.name.endsWith(".schem"))) return this.error(interaction, "Please provide the schematic in the form of a schematic!");
             await axios.post("http://cloud.bte.ger:45655/api/schematics/upload", {
@@ -166,10 +168,12 @@ class schematicCommand extends Command {
         }
 
         if (interaction.options.getSubcommand() === "transfer") {
-            const comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value;
             const terra1 = await interaction.options._hoistedOptions.find((x) => x.name === "fromserver").value;
             const terra2 = await interaction.options._hoistedOptions.find((x) => x.name === "toserver").value;
             const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
+            let comment = "";
+
+            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch {}
 
             await axios.post("http://cloud.bte.ger:45655/api/schematics/transfer", {
                 "terra1": terra1,
@@ -187,7 +191,9 @@ class schematicCommand extends Command {
         if (interaction.options.getSubcommand() === "delete") {
             const terra = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value;
             const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
-            const comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value;
+            let comment = "";
+
+            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch {}
 
             await axios.post("http://cloud.bte.ger:45655/api/schematics/transfer", {
                 "terra": terra,
