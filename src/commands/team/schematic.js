@@ -152,8 +152,9 @@ class schematicCommand extends Command {
         if (interaction.options.getSubcommand() === "download") {
             const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value || "";
             const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
-            const comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value;
+            let comment = "";
 
+            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch {}
             await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name}`, {responseType: "arraybuffer"})
                 .then(async ({data: schem}) => {
                     let {data: filetype} = await axios.get(`http://cloud.bte.ger:45655/api/schematics/filetype?terra=${terraname.replace(" ", "-")}&name=${name}`);
@@ -174,7 +175,6 @@ class schematicCommand extends Command {
             let comment = "";
 
             try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch {}
-
             await axios.post("http://cloud.bte.ger:45655/api/schematics/transfer", {
                 "terra1": terra1,
                 "terra2": terra2,
@@ -194,7 +194,6 @@ class schematicCommand extends Command {
             let comment = "";
 
             try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch {}
-
             await axios.post("http://cloud.bte.ger:45655/api/schematics/transfer", {
                 "terra": terra,
                 "name": name
