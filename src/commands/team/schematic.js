@@ -152,7 +152,7 @@ class schematicCommand extends Command {
                 let dat = res.data
                     .filter(a => a.endsWith(".schematic") || a.endsWith(".schem"))
                     .map(a => a.replace(".schematic", "").replace(".schem", ""));
-                let chunks = chunkify(dat, 1950, 3); // Adjust the number of columns as needed
+                let chunks = chunkify(dat, 1950, 3);
                 this.response(interaction, `Schematics on ${terraname}:`);
                 chunks.forEach(chunk => {
                     return client.channels.cache.get(interaction.channelId).send({ content: "```" + chunk + "```" });
