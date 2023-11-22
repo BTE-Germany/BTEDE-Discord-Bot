@@ -97,22 +97,34 @@ class schematicCommand extends Command {
 
     async run(interaction, client) {
         function chunkify(dat, size) {
-            var chunks = [];
-            dat.reduce((chuckStr, word, i, a) => {
-              var pageIndex = `--- Seite ${(chunks.length + 1)} --- \n \n`;
-              if ((chuckStr.length + word.length + pageIndex.length) > size) {
-                chunks.push(pageIndex + chuckStr);
-                chuckStr = word;
-              } else if (i === a.length - 1) {
-                chunks.push(pageIndex + chuckStr + '\n' + word);
-              } else {
-                chuckStr += '\n' + word;
-              }
-              return chuckStr;
+            let chunks = [];
+            dat.reduce((chunkStr, schematicName, i, a) => {
+                let pageIndex = `--- Seite ${(chunks.length + 1)} --- \n \n`;
+                if ((chunkStr.length + schematicName.length + pageIndex.length) > size) {
+                    chunks.push(pageIndex + chunkStr);
+                    chunkStr = schematicName;
+                } else if (i === a.length - 1) {
+                    chunks.push(pageIndex + chunkStr + '\n' + schematicName);
+                } else {
+                    chunkStr += '\n' + schematicName;
+                }
+                return chunkStr;
             }, '');
             return chunks;
-          }
-
+        }
+        
+        function formatColumns(data) {
+            const maxColumnWidth = 30;
+            const columns = Math.floor(1950 / maxColumnWidth);
+            const result = [];
+            for (let i = 0; i < data.length; i += columns) {
+                const row = data.slice(i, i + columns);
+                const formattedRow = row.map(item => item.padEnd(maxColumnWidth)).join('  ');
+                result.push(formattedRow);
+            }
+            return result;
+        }
+        
         if (interaction.options.getSubcommand() === "list") {
             const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value || "";
             await axios.get(`http://cloud.bte.ger:45655/api/schematics/list?terra=${terraname.replace(" ", "-")}`).then((res) => {
@@ -121,13 +133,25 @@ class schematicCommand extends Command {
                     .map(a => a.replace(".schematic", "").replace(".schem", ""));
                 let chunks = chunkify(dat, 1950);
                 this.response(interaction, `Schematics on ${terraname}:`);
-                chunks.forEach(chunk => {
-                    return client.channels.cache.get(interaction.channelId).send({content: "```" + chunk + "```"});
-                });
+        
+                for (const chunk of chunks) {
+                    const formattedChunk = formatColumns(chunk.split('\n'));
+                    for (const row of formattedChunk) {
+                        if (row.length > 2000) {
+                            // Split long rows into multiple messages
+                            const slicedRows = row.match(/.{1,2000}/g);
+                            for (const slicedRow of slicedRows) {
+                                client.channels.cache.get(interaction.channelId).send({ content: "```" + slicedRow + "```" });
+                            }
+                        } else {
+                            client.channels.cache.get(interaction.channelId).send({ content: "```" + row + "```" });
+                        }
+                    }
+                }
             }).catch((e) => {
                 console.log(e.message);
                 return this.error(interaction, `Failed to list schematics on ${terraname}!`);
-            })
+            });
         }
 
         if (interaction.options.getSubcommand() === "upload") {
