@@ -193,6 +193,8 @@ module.exports = class extends BaseEvent {
         );
 
         if (data.role === "builder" || data.role === "trial") {
+          // removed because current RCON integration is broken
+          /*
           await client.RCON.Lobby.connect();
           if(data.platform === "Java") {
           client.RCON.Lobby.run(`whitelist add ${data.uuid}`, true);
@@ -200,6 +202,8 @@ module.exports = class extends BaseEvent {
             client.RCON.Lobby.run(`fwhitelist add ${data.minecraft}`)
           }
           client.RCON.Lobby.run(`lp user ${data.uuid} parent set ${data.role}`);
+          */
+          
 
           let member =
             interaction.guild.members.cache.get(data.id) ||
