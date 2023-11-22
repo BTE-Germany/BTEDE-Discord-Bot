@@ -1,4 +1,4 @@
-const { CommandInteraction, MessageAttachment } = require("discord.js");
+const {CommandInteraction, MessageAttachment} = require("discord.js");
 const Command = require("../../classes/Command.js");
 const axios = require("axios");
 const Bot = require("../../classes/Bot.js");
@@ -18,7 +18,7 @@ class schematicCommand extends Command {
                     description: "The terraserver to upload to",
                     type: 3,
                     required: true,
-                    choices: client.config.status.map((s) => ({ name: s.id, value: s.id })),
+                    choices: client.config.status.map((s) => ({name: s.id, value: s.id})),
                 }, {
                     name: "comment",
                     description: "A comment you want to add to the message",
@@ -31,7 +31,7 @@ class schematicCommand extends Command {
                     description: "The terraserver to list schematics from",
                     type: 3,
                     required: true,
-                    choices: client.config.status.map((s) => ({ name: s.id, value: s.id })),
+                    choices: client.config.status.map((s) => ({name: s.id, value: s.id})),
                 }]
             }, {
                 name: "download", description: "Downloads a schematic", type: 1, options: [{
@@ -39,7 +39,7 @@ class schematicCommand extends Command {
                     description: "The terraserver to download from",
                     type: 3,
                     required: true,
-                    choices: client.config.status.map((s) => ({ name: s.id, value: s.id })),
+                    choices: client.config.status.map((s) => ({name: s.id, value: s.id})),
                 }, {
                     name: "schematic", description: "The schematic to download", type: 3, required: true
                 }, {
@@ -54,13 +54,13 @@ class schematicCommand extends Command {
                     description: "The terraserver to transfer from",
                     type: 3,
                     required: true,
-                    choices: client.config.status.map((s) => ({ name: s.id, value: s.id })),
+                    choices: client.config.status.map((s) => ({name: s.id, value: s.id})),
                 }, {
                     name: "toserver",
                     description: "The terraserver to transfer to",
                     type: 3,
                     required: true,
-                    choices: client.config.status.map((s) => ({ name: s.id, value: s.id })),
+                    choices: client.config.status.map((s) => ({name: s.id, value: s.id})),
                 }, {
                     name: "schematic", description: "The schematic to transfer", type: 3, required: true
                 }, {
@@ -75,7 +75,7 @@ class schematicCommand extends Command {
                     description: "The terraserver to delete from",
                     type: 3,
                     required: true,
-                    choices: client.config.status.map((s) => ({ name: s.id, value: s.id })),
+                    choices: client.config.status.map((s) => ({name: s.id, value: s.id})),
                 }, {
                     name: "schematic", description: "The schematic to delete", type: 3, required: true
                 }, {
@@ -96,35 +96,22 @@ class schematicCommand extends Command {
      */
 
     async run(interaction, client) {
-
         function chunkify(dat, size) {
-            let chunks = [];
-            dat.reduce((chunkStr, schematicName, i, a) => {
-                let pageIndex = `--- Seite ${(chunks.length + 1)} --- \n \n`;
-                if ((chunkStr.length + schematicName.length + pageIndex.length) > size) {
-                    chunks.push(pageIndex + chunkStr);
-                    chunkStr = schematicName;
-                } else if (i === a.length - 1) {
-                    chunks.push(pageIndex + chunkStr + '\n' + schematicName);
-                } else {
-                    chunkStr += '\n' + schematicName;
-                }
-                return chunkStr;
+            var chunks = [];
+            dat.reduce((chuckStr, word, i, a) => {
+              var pageIndex = `--- Seite ${(chunks.length + 1)} --- \n \n`;
+              if ((chuckStr.length + word.length + pageIndex.length) > size) {
+                chunks.push(pageIndex + chuckStr);
+                chuckStr = word;
+              } else if (i === a.length - 1) {
+                chunks.push(pageIndex + chuckStr + '\n' + word);
+              } else {
+                chuckStr += '\n' + word;
+              }
+              return chuckStr;
             }, '');
             return chunks;
-        }
-
-        function formatColumns(data) {
-            const maxColumnWidth = 30;
-            const columns = Math.floor(1950 / maxColumnWidth);
-            const result = [];
-            for (let i = 0; i < data.length; i += columns) {
-                const row = data.slice(i, i + columns);
-                const formattedRow = row.map(item => item.padEnd(maxColumnWidth)).join('  ');
-                result.push(formattedRow);
-            }
-            return result.join('\n');
-        }
+          }
 
         if (interaction.options.getSubcommand() === "list") {
             const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value || "";
@@ -135,29 +122,27 @@ class schematicCommand extends Command {
                 let chunks = chunkify(dat, 1950);
                 this.response(interaction, `Schematics on ${terraname}:`);
                 chunks.forEach(chunk => {
-                    const formattedChunk = formatColumns(chunk.split('\n'));
-                    return client.channels.cache.get(interaction.channelId).send({ content: "```" + formattedChunk + "```" });
+                    return client.channels.cache.get(interaction.channelId).send({content: "```" + chunk + "```"});
                 });
             }).catch((e) => {
                 console.log(e.message);
                 return this.error(interaction, `Failed to list schematics on ${terraname}!`);
-            });
+            })
         }
-
 
         if (interaction.options.getSubcommand() === "upload") {
             const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value || "";
             const schemfile = await interaction.options._hoistedOptions.find((o) => o.name === "schematic").attachment;
             let comment = "";
 
-            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch { }
+            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch {}
             if (!schemfile) return this.error(interaction, "Please provide a valid schematic!");
             if (!(schemfile.name.endsWith(".schematic") || schemfile.name.endsWith(".schem"))) return this.error(interaction, "Please provide the schematic in the form of a schematic!");
             await axios.post("http://cloud.bte.ger:45655/api/schematics/upload", {
                 "url": schemfile.url, "terra": terraname.replace(" ", "-"),
             }).then((res) => {
                 this.response(interaction, `Successfully uploaded the schematic to ${res.data.server} as ${res.data.fileName}.schematic`);
-                if (comment.length > 0) client.channels.cache.get(interaction.channelId).send({ content: "Kommentar: " + comment });
+                if(comment.length > 0 ) client.channels.cache.get(interaction.channelId).send({content: "Kommentar: " + comment});
                 return;
             }).catch((e) => {
                 console.log(e.message);
@@ -170,13 +155,13 @@ class schematicCommand extends Command {
             const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
             let comment = "";
 
-            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch { }
-            await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name}`, { responseType: "arraybuffer" })
-                .then(async ({ data: schem }) => {
-                    let { data: filetype } = await axios.get(`http://cloud.bte.ger:45655/api/schematics/filetype?terra=${terraname.replace(" ", "-")}&name=${name}`);
+            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch {}
+            await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?terra=${terraname.replace(" ", "-")}&name=${name}`, {responseType: "arraybuffer"})
+                .then(async ({data: schem}) => {
+                    let {data: filetype} = await axios.get(`http://cloud.bte.ger:45655/api/schematics/filetype?terra=${terraname.replace(" ", "-")}&name=${name}`);
                     const attachment = new MessageAttachment(schem, name + filetype);
                     await interaction.editReply("Here you go!");
-                    return client.channels.cache.get(interaction.channelId).send({ content: "Kommentar: " + comment, files: [attachment] });
+                    return client.channels.cache.get(interaction.channelId).send({content: "Kommentar: " + comment, files: [attachment]});
                 })
                 .catch(async (e) => {
                     await this.error(interaction, "Schematic not found");
@@ -190,33 +175,33 @@ class schematicCommand extends Command {
             const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
             let comment = "";
 
-            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch { }
+            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch {}
             await axios.post("http://cloud.bte.ger:45655/api/schematics/transfer", {
                 "terra1": terra1,
                 "terra2": terra2,
                 "name": name
             }).then((res) => {
                 this.response(interaction, res.data.message);
-                if (comment.length > 0) client.channels.cache.get(interaction.channelId).send({ content: "Kommentar: " + comment });
+                if(comment.length > 0 ) client.channels.cache.get(interaction.channelId).send({content: "Kommentar: " + comment});
                 return;
             }).catch((e) => {
                 console.log(e.message);
                 return this.error(interaction, `Failed to transfer the schematic from ${terra1} to ${terra2}!`);
             })
         }
-
+        
         if (interaction.options.getSubcommand() === "delete") {
             const terra = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value;
             const name = await interaction.options._hoistedOptions.find((x) => x.name === "schematic").value;
             let comment = "";
 
-            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch { }
+            try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch {}
             await axios.post("http://cloud.bte.ger:45655/api/schematics/transfer", {
                 "terra": terra,
                 "name": name
             }).then((res) => {
                 this.response(interaction, res.data.message);
-                if (comment.length > 0) client.channels.cache.get(interaction.channelId).send({ content: "Kommentar: " + comment });
+                if(comment.length > 0 ) client.channels.cache.get(interaction.channelId).send({content: "Kommentar: " + comment});
                 return;
             }).catch((e) => {
                 console.log(e.message);
