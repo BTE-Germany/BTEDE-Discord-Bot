@@ -97,53 +97,33 @@ class schematicCommand extends Command {
 
     async run(interaction, client) {
 
-        async function chunkify(dat, size, columns) {
-            function formatColumns(inputList, columns) {
-                const result = [];
-                const columnWidth = 30;
-
-                for (let i = 0; i < inputList.length; i += columns) {
-                    const row = [];
-                    for (let j = 0; j < columns; j++) {
-                        const currentIndex = i + j;
-                        if (currentIndex < inputList.length) {
-                            let text = inputList[currentIndex];
-                            if (text.length > columnWidth) {
-                                const lines = [];
-                                while (text.length > columnWidth) {
-                                    lines.push(text.substring(0, columnWidth));
-                                    text = text.substring(columnWidth);
-                                }
-                                lines.push(text);
-                                text = lines.join('\n');
-                            }
-                            row.push(text);
-                        }
-                    }
-                    result.push(row.join(' | '));
-                }
-
-                return result.join('\n');
-            }
-
+        function chunkify(dat, size) {
             let chunks = [];
-            dat.reduce((chuckStr, word, i, a) => {
+            dat.reduce((chunkStr, schematicName, i, a) => {
                 let pageIndex = `--- Seite ${(chunks.length + 1)} --- \n \n`;
-                if ((chuckStr.length + word.length + pageIndex.length) > size) {
-                    // Format columns and add text-wrap
-                    const formattedColumns = formatColumns(chuckStr.split('\n'), columns);
-                    chunks.push(pageIndex + formattedColumns);
-                    chuckStr = word;
+                if ((chunkStr.length + schematicName.length + pageIndex.length) > size) {
+                    chunks.push(pageIndex + chunkStr);
+                    chunkStr = schematicName;
                 } else if (i === a.length - 1) {
-                    // Format columns and add text-wrap for the last chunk
-                    const formattedColumns = formatColumns((chuckStr + '\n' + word).split('\n'), columns);
-                    chunks.push(pageIndex + formattedColumns);
+                    chunks.push(pageIndex + chunkStr + '\n' + schematicName);
                 } else {
-                    chuckStr += '\n' + word;
+                    chunkStr += '\n' + schematicName;
                 }
-                return chuckStr;
+                return chunkStr;
             }, '');
             return chunks;
+        }
+
+        function formatColumns(data) {
+            const maxColumnWidth = 30;
+            const columns = Math.floor(1950 / maxColumnWidth);
+            const result = [];
+            for (let i = 0; i < data.length; i += columns) {
+                const row = data.slice(i, i + columns);
+                const formattedRow = row.map(item => item.padEnd(maxColumnWidth)).join('  ');
+                result.push(formattedRow);
+            }
+            return result.join('\n');
         }
 
         if (interaction.options.getSubcommand() === "list") {
@@ -152,16 +132,18 @@ class schematicCommand extends Command {
                 let dat = res.data
                     .filter(a => a.endsWith(".schematic") || a.endsWith(".schem"))
                     .map(a => a.replace(".schematic", "").replace(".schem", ""));
-                let chunks = chunkify(dat, 1950, 3);
+                let chunks = chunkify(dat, 1950);
                 this.response(interaction, `Schematics on ${terraname}:`);
                 chunks.forEach(chunk => {
-                    return client.channels.cache.get(interaction.channelId).send({ content: "```" + chunk + "```" });
+                    const formattedChunk = formatColumns(chunk.split('\n'));
+                    return client.channels.cache.get(interaction.channelId).send({ content: "```" + formattedChunk + "```" });
                 });
             }).catch((e) => {
                 console.log(e.message);
                 return this.error(interaction, `Failed to list schematics on ${terraname}!`);
             });
         }
+
 
         if (interaction.options.getSubcommand() === "upload") {
             const terraname = await interaction.options._hoistedOptions.find((x) => x.name === "terra").value || "";
