@@ -163,7 +163,7 @@ class MessageEvent extends BaseEvent {
               .catch(client.Logger.warn);
           cData.uuid = uuid.data.id;
           msg.channel.send({
-            content: `https://crafatar.com/renders/body/${uuid?.data?.id}?overlay=true `,
+            content: `https://avatars.bte-germany.de/renders/body/${uuid?.data?.id}?overlay=true `,
           });
         }
         else if(cData.platform === "Bedrock") {
