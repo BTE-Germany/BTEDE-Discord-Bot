@@ -50,15 +50,19 @@ class PlayerListCommand extends Command {
       .setTitle(`Player List`)
       .setColor("#347aeb");
 
-    status.forEach((server) => {
-      replyEmbed.setDescription(
-        `${
-          replyEmbed.description ? replyEmbed.description + "\n\n" : ""
-        }**<:server:833377668057006080> ${server.id} (${server.player})**:\n${
-          server.status
-        }`
-      );
-    });
+    if (status != null && status.length >= 0) {
+      status.forEach((server) => {
+        replyEmbed.setDescription(
+            `${
+                replyEmbed.description ? replyEmbed.description + "\n\n" : ""
+            }**<:server:833377668057006080> ${server.id} (${server.player})**:\n${
+                server.status
+            }`
+        );
+      });
+    } else {
+      replyEmbed.setDescription(`Derzeit keine Builder aktiv.`);
+    }
 
     return await this.response(interaction, replyEmbed);
   }
