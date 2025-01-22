@@ -74,6 +74,13 @@ class CommandsCommand extends Command {
           description: "Edits the text displayed when a command is executed",
           options: [
             {
+              name: "commandname",
+              description: "The name of the command to edit the text of",
+              type: 3,
+              required: true,
+              autocomplete: true,
+            },
+            {
               name: "language",
               description: "The language of the text to edit",
               type: 3,
@@ -90,16 +97,9 @@ class CommandsCommand extends Command {
               ],
             },
             {
-              name: "commandname",
-              description: "The name of the command to edit the text of",
-              type: 3,
-              required: true,
-              autocomplete: true,
-            },
-            {
               name: "type",
               description:
-                "Digga keine ahnung wie ich das beschreiben soll sag eif ob title oder description",
+                "Choose whether to edit the title or the description of the command",
               type: 3,
               required: true,
               choices: [
@@ -332,7 +332,7 @@ class CommandsCommand extends Command {
             .setDescription(
               `The ${
                 type === "d" ? "Description" : "Title"
-              } of the /${command} command has beed changed.`
+              } of the /${command} command has been changed.`
             )
             .addField("New Text:", "```%t```".replace("%t", text))
         );
