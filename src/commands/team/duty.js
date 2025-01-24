@@ -11,7 +11,7 @@ class dutyCommand extends Command {
   constructor(client) {
     super(client, {
       name: "duty",
-      description: "Get a support duty.",
+      description: "Get or remove a support duty.",
       userAvailable: false,
     });
   }

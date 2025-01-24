@@ -96,11 +96,11 @@ class InprocessCommand extends Command {
       client.Logger.error(e);
       return this.error(
         interaction,
-        "Unknown error occured. (`Wasn't able to fetch message`)"
+        "Unknown error occurred. (`Wasn't able to fetch message`)"
       );
     });
 
-    suggestionDb.status = "inrpocess";
+    suggestionDb.status = "inprocess";
     suggestionDb.closed = new Date().getTime();
     await suggestionDb.save();
 
@@ -115,7 +115,7 @@ class InprocessCommand extends Command {
           embeds: [
             new MessageEmbed()
               .setDescription(
-                `You're suggestion (\`${suggestionId}\`) in ${suggestionMessage.guild.name} was set to inprocess, you can find it [here](${suggestionMessage.url}).`
+                `Your suggestion (\`${suggestionId}\`) in ${suggestionMessage.guild.name} was set to inprocess, you can find it [here](${suggestionMessage.url}).`
               )
               .setColor("ORANGE"),
           ],

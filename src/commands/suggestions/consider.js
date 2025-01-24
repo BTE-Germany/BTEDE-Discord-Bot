@@ -96,7 +96,7 @@ class ConsiderCommand extends Command {
       client.Logger.error(e);
       return this.error(
         interaction,
-        "Unknown error occured. (`Wasn't able to fetch message`)"
+        "Unknown error occurred. (`Wasn't able to fetch message`)"
       );
     });
 
@@ -115,7 +115,7 @@ class ConsiderCommand extends Command {
           embeds: [
             new MessageEmbed()
               .setDescription(
-                `You're suggestion (\`${suggestionId}\`) in ${suggestionMessage.guild.name} was considered, you can find it [here](${suggestionMessage.url}).`
+                `Your suggestion (\`${suggestionId}\`) in ${suggestionMessage.guild.name} was considered, you can find it [here](${suggestionMessage.url}).`
               )
               .setColor("YELLOW"),
           ],

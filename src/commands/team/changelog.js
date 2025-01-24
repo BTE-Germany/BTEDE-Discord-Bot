@@ -179,7 +179,7 @@ module.exports = class extends Command {
       let embeds = [
         new MessageEmbed()
           .setColor("GREEN")
-          .setDescription("✅ Embed sent succesfully."),
+          .setDescription("✅ Embed sent successfully."),
       ];
 
       if (errorMsgs.length != 0)

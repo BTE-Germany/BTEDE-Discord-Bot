@@ -89,7 +89,7 @@ class LockCommand extends Command {
         client.Logger.error(e);
         return this.error(
           interaction,
-          "An unknown error ocurred. Contact Devs."
+          "An unknown error occurred. Contact Devs."
         );
       });
   }
