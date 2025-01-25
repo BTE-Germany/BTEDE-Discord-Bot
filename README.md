@@ -2,9 +2,6 @@
 
 BTE Germany Discord Bot
 
-This readme is a work in progress. It describes the available commands and some of the structure and features of the
-bot.
-
 ## Commands:
 
 ### Generally available
@@ -74,15 +71,22 @@ Deletion can be done with `/commands delete {commandname}`.
 
 ### guildMemberAdd
 
+Triggered when a user joins the server. Sends a welcome message and re-applies mute to the user if necessary.
+
 ### interaction
 
-### message
+Handles interactions with the bot (commands, autocompletion, buttons, dropdowns) and forwards the event to the
+corresponding command.
 
+### message
+Checks messages on the discord for the !changelog command, handles suggestions and user registration.
 ### ready
 
 Initializes the bot and registers the handlers.
 
 ### voiceStateUpdate
+
+Notifies support staff if a user is in the waiting room voice channel and joins the bot to play waiting room music.
 
 ## Handlers
 
@@ -92,12 +96,20 @@ Checks the bans saved in the database for their expiry date and revokes them onc
 
 ### instagram
 
+not used
+
 ### Mutes
 
+Checks the mutes saved in the database for their expiry date and revokes them once that date is reached.
+
 ### youtube
+
+not used
 
 ## TODO:
 
 * /activity hat keine Vorschläge für die Options
 * /gif tpll nicht verfügbar
 * Anpassen der Ban-Dauer ermöglichen
+* (Waitingroom.mp3 nicht auf discord hosten und dann Funktionalität reparieren)
+* instagram und youtube handler tun derzeit nichts, evtl entfernen?
