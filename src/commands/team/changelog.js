@@ -1,69 +1,194 @@
-const { 
-  SlashCommandBuilder, 
-  ActionRowBuilder, 
-  ModalBuilder, 
-  TextInputBuilder, 
-  TextInputStyle 
-} = require('discord.js');
+const {
+  MessageEmbed,
+  Interaction,
+  Client,
+  CommandInteraction,
+} = require("discord.js");
+const Command = require("../../classes/Command.js");
+const Bot = require("../../classes/Bot.js");
 
-module.exports = {
-	admin: true,
-	data: new SlashCommandBuilder()
-		.setName('changelog')
-		.setDescription('Öffnet ein Eingabefeld, um einen Changelog zu senden.'),
-	async execute(interaction, client) {
-		const modal = new ModalBuilder()
-			.setTitle('Changelog erstellen')
-			.setCustomId('changelog');
+module.exports = class extends Command {
+  constructor(client) {
+    super(client, {
+      name: "changelog",
+      description: "Creates a changelog",
+      userAvailable: false,
+      options: [
+        {
+          name: "channel",
+          type: 7,
+          channel_types: [0, 5, 10, 11, 12],
+          description: "The channel to send the changelog to",
+          required: true,
+        },
+        {
+          name: "title",
+          type: 3,
+          description: "The title",
+          required: true,
+        },
+        {
+          name: "subtitle1",
+          type: 3,
+          description: "The 1st subtitle",
+          required: true,
+        },
+        {
+          name: "content1",
+          type: 3,
+          description: "The 1st content",
+          required: true,
+        },
+        {
+          name: "subtitle2",
+          type: 3,
+          description: "The 2nd subtitle",
+          required: false,
+        },
+        {
+          name: "content2",
+          type: 3,
+          description: "The 2nd content",
+          required: false,
+        },
+        {
+          name: "subtitle3",
+          type: 3,
+          description: "The 3rd subtitle",
+          required: false,
+        },
+        {
+          name: "content3",
+          type: 3,
+          description: "The 3rd content",
+          required: false,
+        },
+        {
+          name: "subtitle4",
+          type: 3,
+          description: "The 4th subtitle",
+          required: false,
+        },
+        {
+          name: "content4",
+          type: 3,
+          description: "The 4th content",
+          required: false,
+        },
+        {
+          name: "subtitle5",
+          type: 3,
+          description: "The 5th subtitle",
+          required: false,
+        },
+        {
+          name: "content5",
+          type: 3,
+          description: "The 5th content",
+          required: false,
+        },
+        {
+          name: "subtitle6",
+          type: 3,
+          description: "The 6th subtitle",
+          required: false,
+        },
+        {
+          name: "content6",
+          type: 3,
+          description: "The 6th content",
+          required: false,
+        },
+        {
+          name: "subtitle7",
+          type: 3,
+          description: "The 7th subtitle",
+          required: false,
+        },
+        {
+          name: "content7",
+          type: 3,
+          description: "The 7th content",
+          required: false,
+        },
+      ],
+    });
+  }
 
-		const titleInput = new TextInputBuilder()
-			.setCustomId('title')
-			.setPlaceholder('Titel des Embeds')
-			.setLabel('Titel')
-			.setStyle(TextInputStyle.Short)
-			.setMaxLength(200)
-			.setRequired(true); 
+  /**
+   *
+   * @param {CommandInteraction} interaction
+   * @param {Bot} client
+   */
 
-		const staffInput = new TextInputBuilder()
-			.setCustomId('staff')
-			.setPlaceholder('Staff Änderungen (z. B. Teamänderungen, wichtige Infos)')
-			.setLabel('Staff')
-			.setStyle(TextInputStyle.Paragraph)
-			.setMaxLength(450)
-			.setRequired(false); 
+  async run(interaction, client) {
+    const options = interaction.options;
+    const args = options.data;
 
-		const changesInput = new TextInputBuilder()
-			.setCustomId('changes')
-			.setPlaceholder('Änderungen auf Discord oder Minecraft (kombiniert)')
-			.setLabel('Discord & Minecraft Changes')
-			.setStyle(TextInputStyle.Paragraph)
-			.setMaxLength(450)
-			.setRequired(false); 
+    const channel = args.find((arg) => arg.name === "channel").channel;
 
-		const protocolsInput = new TextInputBuilder()
-			.setCustomId('meetingProtocols')
-			.setPlaceholder('Zusammenfassung von Meetings')
-			.setLabel('Meeting Protocols')
-			.setStyle(TextInputStyle.Paragraph)
-			.setMaxLength(450)
-			.setRequired(false); 
+    let title = args.find((arg) => arg.name === "title").value;
 
-		const generalInput = new TextInputBuilder()
-			.setCustomId('general')
-			.setPlaceholder('Allgemeine Informationen oder Spenden-Infos')
-			.setLabel('General & Donations')
-			.setStyle(TextInputStyle.Paragraph)
-			.setMaxLength(450)
-			.setRequired(false); 
+    let subArgs = args
+      .filter((arg) => arg.name != "title")
+      .filter((arg) => arg.name != "channel");
 
-		const titleRow = new ActionRowBuilder().addComponents(titleInput);
-		const staffRow = new ActionRowBuilder().addComponents(staffInput);
-		const changesRow = new ActionRowBuilder().addComponents(changesInput);
-		const protocolsRow = new ActionRowBuilder().addComponents(protocolsInput);
-		const generalRow = new ActionRowBuilder().addComponents(generalInput);
+    let changelogEmbed = new this.embed().setTitle(title);
 
-		modal.addComponents(titleRow, staffRow, changesRow, protocolsRow, generalRow);
+    let errorMsgs = [];
 
-		await interaction.showModal(modal);
-	},
+    subArgs.forEach((subArg) => {
+      if (subArg.name.startsWith("subtitle")) {
+        let subNumber = subArg.name.split("subtitle")[1];
+        let subText = subArgs.find(
+          (textArg) => textArg.name === `content${subNumber}`
+        );
+        subArgs = subArgs.filter((fArg) => fArg.name != `content${subNumber}`);
+        subArgs = subArgs.filter((fArg) => fArg.name != `subtitle${subNumber}`);
+        if (!subText)
+          return errorMsgs.push(
+            `**Titel ${subNumber}** hat keinen dazugehörigen Text und wurde deshalb nicht in das Embed aufgenommen. (\`${subArg.value}\`)`
+          );
+        changelogEmbed.addField(
+          subArg.value.substr(0, 32),
+          subText.value.substr(0, 1024),
+          false
+        );
+      }
+    });
+
+    setTimeout(() => {
+      subArgs.forEach((subArg) => {
+        errorMsgs.push(
+          `**Content ${
+            subArg.name.split("content")[1]
+          }** hat keinen dazugehörigen Titel**und wurde deshalb nicht in das Embed aufgenommen. (\`${
+            subArg.value
+          }\`)`
+        );
+      });
+    }, 150);
+
+    setTimeout(async () => {
+      channel.send({ embeds: [changelogEmbed] }).catch((e) => {
+        return this.error(
+          `Can't send messages to <#${channel.id}>. Error: \`\`\`js\n${e}\`\`\``
+        );
+      });
+
+      let embeds = [
+        new MessageEmbed()
+          .setColor("GREEN")
+          .setDescription("✅ Embed sent successfully."),
+      ];
+
+      if (errorMsgs.length != 0)
+        embeds.push(
+          new MessageEmbed()
+            .setColor("#ff0000")
+            .setDescription(":x: " + errorMsgs.join("\n\n:x: "))
+        );
+      await this.response(interaction, embeds);
+    }, 500);
+  }
 };
