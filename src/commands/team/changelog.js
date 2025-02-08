@@ -1,4 +1,8 @@
 const { 
+  MessageEmbed,
+  Interaction,
+  Client,
+  CommandInteraction,
   ActionRowBuilder, 
   ModalBuilder, 
   TextInputBuilder, 
