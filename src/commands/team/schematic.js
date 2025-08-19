@@ -126,7 +126,7 @@ class schematicCommand extends Command {
             let comment = "";
 
             try { comment = await interaction.options._hoistedOptions.find((x) => x.name === "comment").value; } catch {}
-            await axios.post("http://cloud.bte.ger:45655/api/schematics/transfer", {
+            await axios.post("http://cloud.bte.ger:45655/api/schematics/delete", {
                 "name": name
             }).then((res) => {
                 this.response(interaction, res.data.message);
