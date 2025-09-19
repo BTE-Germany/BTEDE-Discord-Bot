@@ -1,10 +1,4 @@
-const {
-  MessageEmbed,
-  Interaction,
-  Client,
-  CommandInteraction,
-  Util,
-} = require("discord.js");
+const { escapeMarkdown } = require("discord.js");
 const Command = require("../classes/Command.js");
 const util = require("minecraft-server-util");
 const Bot = require("../classes/Bot.js");
@@ -76,7 +70,7 @@ async function getStatus(ips, server) {
   let s = ``;
   res.samplePlayers?.forEach(
     (p) =>
-      (s = `${s}${s.length === 0 ? "" : ", "}${Util.escapeMarkdown(p.name)}`)
+      (s = `${s}${s.length === 0 ? "" : ", "}${escapeMarkdown(p.name)}`)
   );
 
   if (s.length != 0) {

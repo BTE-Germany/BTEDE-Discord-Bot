@@ -1,10 +1,4 @@
-const {
-  MessageEmbed,
-  Interaction,
-  Client,
-  CommandInteraction,
-  SnowflakeUtil,
-} = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const Command = require("../../classes/Command.js");
 const Bot = require("../../classes/Bot.js");
 
@@ -33,7 +27,7 @@ class UnmuteCommand extends Command {
 
   /**
    *
-   * @param {CommandInteraction} interaction
+   * @param {import("discord.js").CommandInteraction} interaction
    * @param {Bot} client
    */
 
@@ -88,14 +82,15 @@ class UnmuteCommand extends Command {
     c.deleted = true;
     await c.save();
 
-    let unmuteEmbed = new MessageEmbed()
-      .setColor("GREEN")
+    let unmuteEmbed = new EmbedBuilder()
+      .setColor(Colors.Green)
       .setTitle("✅ Unmute")
       .setTimestamp()
-      .setFooter(
-        "BTE Germany",
-        "https://cdn.discordapp.com/icons/692825222373703772/a_e643511c769fd27a0f361d01c23f2cee.gif?size=1024"
-      )
+      .setFooter({
+        text: "BTE Germany",
+        iconURL:
+          "https://cdn.discordapp.com/icons/692825222373703772/a_e643511c769fd27a0f361d01c23f2cee.gif?size=1024",
+      })
       .addFields([
         {
           name: "🚨 Moderator",
@@ -128,7 +123,7 @@ class UnmuteCommand extends Command {
 
     let unmuteResponseEmbed = new this.embed()
       .setDescription(`The user has been **unmuted**.`)
-      .setColor("GREEN");
+      .setColor(Colors.Green);
 
     return this.response(interaction, unmuteResponseEmbed);
   }

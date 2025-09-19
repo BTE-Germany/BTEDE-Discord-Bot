@@ -1,7 +1,14 @@
-const { MessageEmbed, CommandInteraction } = require("discord.js");
+﻿const { ApplicationCommandOptionType, CommandInteraction } = require("discord.js");
 const BaseCommand = require("./Command.js");
 const Bot = require("./Bot.js");
 const { default: axios } = require("axios");
+
+const buildCmsBasePath = (client) => {
+  const cmsConfig = client.config?.services?.cms ?? {};
+  const baseUrl = cmsConfig.baseUrl.replace(/\/+$/, "");
+  const segment = cmsConfig.botMessagesPath.startsWith("/") ? cmsConfig.botMessagesPath : `/${cmsConfig.botMessagesPath}`;
+  return `${baseUrl}${segment}`;
+};
 
 module.exports = class InfoCommand extends BaseCommand {
   constructor(opts, name, desc) {
@@ -13,7 +20,7 @@ module.exports = class InfoCommand extends BaseCommand {
         {
           name: "language",
           description: "Language",
-          type: 3,
+          type: ApplicationCommandOptionType.String,
           required: false,
           choices: [
             {
@@ -44,7 +51,8 @@ module.exports = class InfoCommand extends BaseCommand {
     if (args[0]?.value === "en" || args[0]?.value === "lang_en")
       language = "en";
 
-    let url = `https://cms.bte-germany.de/items/botmessages/${language}_${this.help.name}`;
+    const cmsBasePath = buildCmsBasePath(client);
+    const url = `${cmsBasePath}/${language}_${this.help.name}/`;
     let response = await axios({
       method: "get",
       url: url,

@@ -1,47 +1,80 @@
-const express = require("express");
+﻿const express = require("express");
 const { default: axios } = require("axios");
-const { MessageEmbed } = require("discord.js");
-const bodyParser = require("body-parser");
+const { EmbedBuilder } = require("discord.js");
+
+const buildCmsUrl = (base, subPath) => {
+  const normalizedBase = (base || "").replace(/\/+$/, "");
+  const segment = subPath ? (subPath.startsWith("/") ? subPath : `/${subPath}`) : "";
+  return `${normalizedBase}${segment}`;
+};
 
 module.exports = (client) => {
   const app = express();
 
-  app.use(bodyParser.json());
+  app.use(express.json());
   app.use(
-    bodyParser.urlencoded({
+    express.urlencoded({
       extended: true,
     })
   );
 
   app.post("/messageUpdate", async (req, res) => {
-    console.log("request");
-    let key = req?.body?.keys?.[0];
-    if (!key) return console.log(4);
+    const key = req?.body?.keys?.[0];
+    if (!key) {
+      res.status(400).send("Missing key");
+      return;
+    }
 
-    let data = await axios.get(
-      `https://cms.bte-germany.de/items/channelmessages/${key}`
-    );
-    if (!data || !data.data || !data.data.data) return console.log(5);
+    const cmsConfig = client.config?.services?.cms ?? {};
+    const channelMessagesUrl = `${buildCmsUrl(
+      cmsConfig.baseUrl || "https://cms.bte-germany.de",
+      cmsConfig.channelMessagesPath || "/items/channelmessages"
+    )}/${key}`;
 
-    let channelId = data.data.data.channelId;
-    let messageId = data.data.data.messageId;
+    let data;
+    try {
+      data = await axios.get(channelMessagesUrl);
+    } catch (error) {
+      client.Logger.warn(`Failed to load message update payload: ${error.message}`);
+      res.status(502).send("Upstream error");
+      return;
+    }
 
-    let channel = await client.channels.fetch(channelId).catch((e) => {
-      console.log(e);
+    if (!data || !data.data || !data.data.data) {
+      res.status(404).send("Message data not found");
+      return;
+    }
+
+    const channelId = data.data.data.channelId;
+    const messageId = data.data.data.messageId;
+
+    const channel = await client.channels.fetch(channelId).catch((e) => {
+      client.Logger.warn(`Failed to fetch channel ${channelId}: ${e.message}`);
     });
-    if (!channel) return console.log(2);
+    if (!channel) {
+      res.status(404).send("Channel not found");
+      return;
+    }
 
-    let message = await channel.messages.fetch(messageId).catch((e) => {
-      console.log(e);
+    const message = await channel.messages.fetch(messageId).catch((e) => {
+      client.Logger.warn(`Failed to fetch message ${messageId}: ${e.message}`);
     });
-    if (!message) return console.log(3);
+    if (!message) {
+      res.status(404).send("Message not found");
+      return;
+    }
 
-    let embedData = data.data.data.content;
+    const embedData = data.data.data.content;
 
-    await message.edit({ embeds: [new MessageEmbed(embedData)] }).catch((e) => {
-      console.log(e);
+    await message.edit({ embeds: [new EmbedBuilder(embedData)] }).catch((e) => {
+      client.Logger.warn(`Failed to edit message ${messageId}: ${e.message}`);
     });
+
+    res.sendStatus(204);
   });
 
-  app.listen(18769, client.Logger.info(`Started messageUpdateAPI`, "API"));
+  app.listen(18769, () =>
+    client.Logger.info(`Started messageUpdateAPI on port 18769`, "API")
+  );
 };
+

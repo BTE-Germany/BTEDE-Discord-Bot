@@ -1,4 +1,4 @@
-# BTEDE-Discord-Bot
+﻿# BTEDE-Discord-Bot
 
 BTE Germany Discord Bot
 
@@ -38,7 +38,6 @@ BTE Germany Discord Bot
 | `/unmute`     | Unmutes a user                                   | user, reason                                                                                                                                                                                             |
 | `/warn user`  | Warns a user via mention                         | user, reason                                                                                                                                                                                             |
 | `/warn id`    | Warns a user via user ID                         | user, reason                                                                                                                                                                                             |
-| `/welcome`    | Dis- or enables welcome messages for the server. |                                                                                                                                                                                                          |
 
 For `/commands` see [Dynamically defined](#dynamically-defined)
 
@@ -54,18 +53,10 @@ For `/commands` see [Dynamically defined](#dynamically-defined)
 
 ### Dynamically defined
 
-Team members have the option of adding and removing commands using `/command`.
-These are dynamically loaded and are stored in .json files with the commands name inside `/src/lang/de` and
-`/src/lang/en`, depending on the language of the command, and in `/config/infoCommands.json`.
-
-To view a list of commands either check these files on the server running the bot or use the `/help` command to get the
-full list.
-
-Adding a command is done with `/commands add {commandname} {english-title} {english-description} {german-title}
-{german-description}`.<br>
-To edit an existing command use `/commands edit {commandname} {language} {type} {text}`, where `type` refers to whether
-you are editing the title or the description.<br>
-Deletion can be done with `/commands delete {commandname}`.
+Dynamic info commands are managed entirely through the CMS at https://cms.bte-germany.de.
+Use the CMS interface to add, edit, or remove those commands; the bot will load the latest content automatically when it
+starts.
+To view the available commands use `/help` inside Discord.
 
 ## Events
 
@@ -79,7 +70,9 @@ Handles interactions with the bot (commands, autocompletion, buttons, dropdowns)
 corresponding command.
 
 ### message
+
 Checks messages on the discord for the !changelog command, handles suggestions and user registration.
+
 ### ready
 
 Initializes the bot and registers the handlers.
@@ -94,17 +87,9 @@ Notifies support staff if a user is in the waiting room voice channel and joins 
 
 Checks the bans saved in the database for their expiry date and revokes them once that date is reached.
 
-### instagram
-
-not used
-
 ### Mutes
 
 Checks the mutes saved in the database for their expiry date and revokes them once that date is reached.
-
-### youtube
-
-not used
 
 ## TODO:
 
@@ -112,4 +97,12 @@ not used
 * /gif tpll nicht verfügbar
 * Anpassen der Ban-Dauer ermöglichen
 * (Waitingroom.mp3 nicht auf discord hosten und dann Funktionalität reparieren)
-* instagram und youtube handler tun derzeit nichts, evtl entfernen?
+
+## Development Setup
+
+1. Install dependencies with `npm install`.
+2. Log in to the secret management with `npx infisical login` using https://secrets.dachstein.cloud/ as the instance
+   URL.
+3. Create local infisical config with `npx infisical init`.
+4. Run `npm run dev` to start the bot against your development environment. Use `npm start` (with production
+   credentials) for live deployments.

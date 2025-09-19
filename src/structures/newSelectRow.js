@@ -1,71 +1,71 @@
-const { MessageActionRow, MessageButton } = require("discord.js");
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 module.exports = [
-  new MessageActionRow().addComponents([
-    new MessageButton()
+  new ActionRowBuilder().addComponents([
+    new ButtonBuilder()
       .setDisabled(false)
       .setLabel("Java / Bedrock")
       .setCustomId("cp_platform")
-      .setStyle("SECONDARY"),
+      .setStyle(ButtonStyle.Secondary),
 
-    new MessageButton()
+    new ButtonBuilder()
       .setDisabled(false)
       .setLabel("Minecraft Name")
       .setCustomId("cp_minecraft")
-      .setStyle("SECONDARY"),
+      .setStyle(ButtonStyle.Secondary),
 
-    new MessageButton()
+    new ButtonBuilder()
       .setDisabled(false)
       .setLabel("City")
       .setCustomId("cp_city")
-      .setStyle("SECONDARY"),
+      .setStyle(ButtonStyle.Secondary),
 
-    new MessageButton()
+    new ButtonBuilder()
       .setDisabled(false)
       .setLabel("Federal State")
       .setCustomId("cp_federalState")
-      .setStyle("SECONDARY"),
+      .setStyle(ButtonStyle.Secondary),
   ]),
 
-  new MessageActionRow().addComponents([
-    new MessageButton()
+  new ActionRowBuilder().addComponents([
+    new ButtonBuilder()
       .setDisabled(false)
       .setLabel("Creation Images")
       .setCustomId("cp_creationImages")
-      .setStyle("SECONDARY"),
+      .setStyle(ButtonStyle.Secondary),
 
-    new MessageButton()
+    new ButtonBuilder()
       .setDisabled(false)
       .setLabel("Reference Images")
       .setCustomId("cp_referenceImages")
-      .setStyle("SECONDARY"),
+      .setStyle(ButtonStyle.Secondary),
 
-    new MessageButton()
+    new ButtonBuilder()
       .setDisabled(false)
       .setLabel("Coordinates")
-      .setEmoji(":x:")
+      .setEmoji("❌")
       .setCustomId("cp_coordinates")
-      .setStyle("SECONDARY"),
+      .setStyle(ButtonStyle.Secondary),
   ]),
 
-  new MessageActionRow().addComponents([
-    new MessageButton()
+  new ActionRowBuilder().addComponents([
+    new ButtonBuilder()
       .setDisabled(false)
       .setLabel("FINISH")
       .setCustomId("cp_finish")
-      .setStyle("DANGER"),
+      .setStyle(ButtonStyle.Danger),
 
-    new MessageButton()
+    new ButtonBuilder()
       .setDisabled(false)
       .setLabel("CANCEL")
       .setCustomId("cp_cancel")
-      .setStyle("DANGER"),
+      .setStyle(ButtonStyle.Danger),
 
-    new MessageButton()
+    new ButtonBuilder()
       .setDisabled(false)
       .setLabel("AUTO-ONWARD")
       .setEmoji("⏱")
       .setCustomId("cp_onward")
-      .setStyle("SUCCESS"),
+      .setStyle(ButtonStyle.Success),
   ]),
 ];

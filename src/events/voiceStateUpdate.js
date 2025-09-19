@@ -1,4 +1,4 @@
-const { MessageEmbed, VoiceState } = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 const BaseEvent = require("../classes/Event.js");
 const Bot = require("../classes/Bot.js");
 const voiceDiscord = require("@discordjs/voice");
@@ -11,8 +11,8 @@ module.exports = class extends BaseEvent {
   /**
    *
    * @param {Bot} client
-   * @param {VoiceState} oldState
-   * @param {VoiceState} newState
+   * @param {import("discord.js").VoiceState} oldState
+   * @param {import("discord.js").VoiceState} newState
    */
 
   async run(client, oldState, newState) {
@@ -39,15 +39,19 @@ module.exports = class extends BaseEvent {
 
       if (!channel?.members?.has(newState?.member?.user?.id)) return;
 
+      const supportRoleMention = client.config?.roles?.supportPing
+        ? `<@&${client.config.roles.supportPing}>`
+        : null;
+
       const supportChannel = await channel.guild.channels
         .fetch(client.config.channels.supportPing)
         .catch(client.Logger.error);
       if (supportChannel) {
         supportChannel
           .send({
-            content: "<@&701845585774510100>",
+            content: supportRoleMention || undefined,
             embeds: [
-              new MessageEmbed()
+              new EmbedBuilder()
                 .setColor("#fcfc04")
                 .setTitle("Support")
                 .setDescription(
@@ -76,8 +80,8 @@ module.exports = class extends BaseEvent {
       player.play(resource);
       connection.subscribe(player);
 
-      player.on(voiceDiscord.VoiceConnectionStatus.Disconnected, () => {
-        player.stop();
+      connection.on(voiceDiscord.VoiceConnectionStatus.Disconnected, () => {
+        connection.destroy();
       });
 
       player.on(voiceDiscord.AudioPlayerStatus.Idle, () => {
@@ -86,3 +90,4 @@ module.exports = class extends BaseEvent {
     }, 5 * 1000);
   }
 };
+

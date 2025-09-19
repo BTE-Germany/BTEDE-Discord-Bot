@@ -1,16 +1,16 @@
-const { MessageActionRow, MessageSelectMenu } = require("discord.js");
+const { ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js");
 
-module.exports = new MessageActionRow().addComponents(
-  new MessageSelectMenu()
+module.exports = new ActionRowBuilder().addComponents(
+  new StringSelectMenuBuilder()
     .setMaxValues(16)
     .setPlaceholder("Select a Federal State")
     .setCustomId("fdrl_selector")
     .addOptions([
       {
-        label: "Baden-Württemberg",
+        label: "Baden-Wuerttemberg",
         value: "bw",
         emoji: "<:bw:710142581178105926>",
-        description: "Baden-Württemberg",
+        description: "Baden-Wuerttemberg",
       },
       {
         label: "Bayern",
@@ -97,8 +97,8 @@ module.exports = new MessageActionRow().addComponents(
         emoji: "<:sh:710142667853398038>",
       },
       {
-        label: "Thüringen",
-        description: "Thüringen",
+        label: "Thueringen",
+        description: "Thueringen",
         value: "th",
         emoji: "<:th:710142690875932816>",
       },

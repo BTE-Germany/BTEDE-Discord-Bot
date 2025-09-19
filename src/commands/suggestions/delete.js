@@ -1,10 +1,3 @@
-const {
-  MessageEmbed,
-  Interaction,
-  Client,
-  CommandInteraction,
-  Message,
-} = require("discord.js");
 const Command = require("../../classes/Command.js");
 const Bot = require("../../classes/Bot.js");
 const googleSuggestions = require("../../functions/googleSuggestions.js");
@@ -28,7 +21,7 @@ class AcceptCommand extends Command {
 
   /**
    *
-   * @param {CommandInteraction} interaction
+   * @param {import("discord.js").CommandInteraction} interaction
    * @param {Bot} client
    */
 

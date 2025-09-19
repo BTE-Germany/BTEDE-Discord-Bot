@@ -1,4 +1,4 @@
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 
 module.exports = (client) => {
   client.Logger.info("Started Handler", "MutesHandler");
@@ -10,16 +10,16 @@ module.exports = (client) => {
     });
     if (cases.length === 0) return;
 
-    cases.forEach(async (c) => {
+    for (const c of cases) {
       let guild =
         client.guilds.cache.get(client.config.guild) ||
         (await client.guilds.cache
           .get(client.config.guild)
           .catch(client.Logger.error));
-      if (!guild) return;
+      if (!guild) continue;
 
       let member = await guild.members.fetch(c.user).catch(client.Logger.error);
-      if (!member) return;
+      if (!member) continue;
 
       if (c.lang === "en")
         member.roles
@@ -33,7 +33,7 @@ module.exports = (client) => {
           .catch(client.Logger.error);
         member.roles.add(client.config.roles.german).catch(client.Logger.error);
       }
-      member.roles.add(client.config.roles.rules);
+      await member.roles.add(client.config.roles.rules);
       member.roles.remove(client.config.roles.muted).catch(client.Logger.error);
 
       if (c?.roles && c?.roles?.length != 0) {
@@ -47,16 +47,17 @@ module.exports = (client) => {
         (await guild.channels
           .fetch(client.config.channels.modlog)
           .catch(client.Logger.error));
-      if (!log) return client.Logger.error("No Log in Mutes.js");
+      if (!log) client.Logger.error("No Log in Mutes.js");
 
-      let unmuteEmbed = new MessageEmbed()
-        .setColor("GREEN")
+      let unmuteEmbed = new EmbedBuilder()
+        .setColor(Colors.Green)
         .setTitle("✅ Unmute")
         .setTimestamp()
-        .setFooter(
-          "BTE Germany",
-          "https://cdn.discordapp.com/icons/692825222373703772/a_e643511c769fd27a0f361d01c23f2cee.gif?size=1024"
-        )
+        .setFooter({
+          text: "BTE Germany",
+          iconURL:
+            "https://cdn.discordapp.com/icons/692825222373703772/a_e643511c769fd27a0f361d01c23f2cee.gif?size=1024",
+        })
         .addFields([
           {
             name: "🚨 Moderator",
@@ -75,11 +76,11 @@ module.exports = (client) => {
           },
         ]);
 
-      log.send({ embeds: [unmuteEmbed] });
+      await log.send({embeds: [unmuteEmbed]});
       member.send({ embeds: [unmuteEmbed] }).catch(client.Logger.warn);
 
       c.deleted = true;
       await c.save();
-    });
+    }
   }, 5000);
 };

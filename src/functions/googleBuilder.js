@@ -1,14 +1,14 @@
-const { google } = require("googleapis");
+﻿const { google } = require("googleapis");
+const config = require("../config");
 
 const colors = {
-  //              red   green blue
   builder: [0.41, 0.93, 0.3],
   trial: [0.03, 0.99, 0.99],
   rejected: [1.0, 0.52, 0.52],
 };
 
 module.exports = async (
-  sId,
+  spreadsheetId,
   range,
   sheetID,
   platform,
@@ -21,46 +21,42 @@ module.exports = async (
   coordinates,
   mod
 ) => {
-  // role
-  let role =
+  const role =
     federalState === "RE"
       ? "rejected"
       : federalState === "TR"
       ? "trial"
       : "builder";
 
-  // auth
   const auth = new google.auth.GoogleAuth({
     keyFile: "secret.json",
-    scopes: "https://www.googleapis.com/auth/spreadsheets",
+    scopes: config?.services?.google?.sheetsScope || "https://www.googleapis.com/auth/spreadsheets",
   });
 
   const client = await auth.getClient();
-
   const googleSheets = google.sheets({ version: "v4", auth: client });
 
-  let spreadsheetData = await googleSheets.spreadsheets.values.get({
+  const spreadsheetData = await googleSheets.spreadsheets.values.get({
     auth,
-    spreadsheetId: sId,
-    range: range,
+    spreadsheetId,
+    range,
   });
 
-  let values = spreadsheetData.data.values;
+  const values = spreadsheetData.data.values || [];
 
-  // get old line
-  let editRow = null; // die reihe in der das steht
+  let editRow = null;
   if (role === "builder" || role === "rejected") {
-    let i = 1;
-    values.forEach((row) => {
-      if (row[7] === "TR" && (row[2] === mcname || row[3] === dctag))
-        editRow = i;
-      i++;
-    });
+    let index = 1;
+    for (const row of values) {
+      if (row[7] === "TR" && (row[2] === mcname || row[3] === dctag)) {
+        editRow = index;
+      }
+      index += 1;
+    }
   }
 
-  // edit old
   if (editRow) {
-    let rowData = values[editRow - 1];
+    const rowData = values[editRow - 1];
     rowData[4] = creationImages;
     rowData[5] = referenceImages;
     rowData[6] = city;
@@ -69,16 +65,16 @@ module.exports = async (
 
     await googleSheets.spreadsheets.batchUpdate({
       auth,
-      spreadsheetId: sId,
+      spreadsheetId,
       resource: {
         requests: [
           {
             updateCells: {
               rows: [
                 {
-                  values: rowData.map((v, i) => ({
+                  values: rowData.map((value) => ({
                     userEnteredValue: {
-                      stringValue: v,
+                      stringValue: value,
                     },
                     userEnteredFormat: {
                       backgroundColor: {
@@ -102,12 +98,12 @@ module.exports = async (
       },
     });
   } else {
-    let d = new Date();
-    let date = `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`;
+    const date = new Date();
+    const formattedDate = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
 
     await googleSheets.spreadsheets.batchUpdate({
       auth,
-      spreadsheetId: sId,
+      spreadsheetId,
       resource: {
         requests: [
           {
@@ -116,7 +112,7 @@ module.exports = async (
               rows: [
                 {
                   values: [
-                    date,
+                    formattedDate,
                     platform,
                     mcname,
                     dctag,
@@ -126,9 +122,9 @@ module.exports = async (
                     federalState,
                     coordinates,
                     mod,
-                  ].map((v, i) => ({
+                  ].map((value) => ({
                     userEnteredValue: {
-                      stringValue: v,
+                      stringValue: value,
                     },
                     userEnteredFormat: {
                       backgroundColor: {

@@ -1,10 +1,4 @@
-const {
-  MessageEmbed,
-  Interaction,
-  Client,
-  CommandInteraction,
-  Message,
-} = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const Command = require("../../classes/Command.js");
 const Bot = require("../../classes/Bot.js");
 const googleSuggestions = require("../../functions/googleSuggestions.js");
@@ -34,7 +28,7 @@ class ConsiderCommand extends Command {
 
   /**
    *
-   * @param {CommandInteraction} interaction
+   * @param {import("discord.js").CommandInteraction} interaction
    * @param {Bot} client
    */
 
@@ -80,17 +74,16 @@ class ConsiderCommand extends Command {
         "Die Nachricht zu dieser Suggestion konnte nicht gefunden werden."
       );
 
-    let suggEmbed = suggestionMessage.embeds[0];
+    const suggEmbed = suggestionMessage.embeds[0] ?? {};
 
-    let newSuggEmbed = suggEmbed;
-    newSuggEmbed.fields = [];
-
-    newSuggEmbed
-      .addField(
-        "Status:",
-        `Consider (${considerText})\n~ ${interaction.user.tag}`
-      )
-      .setColor("YELLOW");
+    const newSuggEmbed = new EmbedBuilder(suggEmbed)
+      .setFields()
+      .addFields({
+        name: "Status:",
+        value: `Consider (${considerText})\n~ ${interaction.user.tag}`,
+        inline: false,
+      })
+      .setColor(Colors.Yellow);
 
     suggestionMessage.edit({ embeds: [newSuggEmbed] }).catch((e) => {
       client.Logger.error(e);
@@ -113,11 +106,11 @@ class ConsiderCommand extends Command {
       suggUser
         .send({
           embeds: [
-            new MessageEmbed()
+            new EmbedBuilder()
               .setDescription(
                 `Your suggestion (\`${suggestionId}\`) in ${suggestionMessage.guild.name} was considered, you can find it [here](${suggestionMessage.url}).`
               )
-              .setColor("YELLOW"),
+              .setColor(Colors.Yellow),
           ],
         })
         .catch((e) => {});

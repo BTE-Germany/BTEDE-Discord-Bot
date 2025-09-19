@@ -1,20 +1,12 @@
-const {
-  MessageEmbed,
-  GuildMemberManager,
-  GuildAuditLogs,
-  MessageAttachment,
-} = require("discord.js");
+const { ActivityType } = require("discord.js");
 const BaseEvent = require("../classes/Event.js");
 const Bot = require("../classes/Bot.js");
-const { Util } = require("discord.js");
-const InstagramHandler = require("../handlers/instagram.js");
-const YoutubeHandler = require("../handlers/youtube.js");
 const MutesHandler = require("../handlers/Mutes.js");
 const BansHandler = require("../handlers/Bans.js");
 
 module.exports = class extends BaseEvent {
   constructor() {
-    super("ready");
+    super("clientReady");
   }
 
   /**
@@ -31,7 +23,7 @@ module.exports = class extends BaseEvent {
     );
 
     /*  let c = client.channels.cache.get("705110368200032297");
-        c.send({ embeds: [ new MessageEmbed()
+        c.send({ embeds: [ new EmbedBuilder()
             .setColor("#046cfc")
             .setTitle("Here you can select your region [Bundesland] and get a text channel for it:")
         ], components: [
@@ -39,34 +31,37 @@ module.exports = class extends BaseEvent {
         ], files: ["./image.png"]})*/
 
     client.commands.forEach((command) => {
-      if (command.config.staffDc) {
+      if (command.config.staffDc && client.config.staffDc?.id) {
         command.initialize(client.config.staffDc.id);
         return;
       }
 
-      command.initialize(client.config.guild);
+      const targetGuild = client.config.guild || client.config.staffDc?.id;
+      if (!targetGuild) {
+        client.Logger.warn(
+          `Skipping registration for /${command.help.name}: no guild configured.`
+        );
+        return;
+      }
+
+      command.initialize(targetGuild);
     });
 
     client.user.setPresence({
-      activities: [{ name: "on BTE-Germany.de", type: "PLAYING" }],
+      activities: [{ name: "on BTE-Germany.de", type: ActivityType.Playing }],
       status: "online",
-      afK: false,
+      afk: false,
     });
     let i = 0;
-    let statusMessages = [
-      "LISTENING_to /help",
-      "PLAYING_on BTE-Germany.de",
+    const statusMessages = [
+      { type: ActivityType.Listening, name: "/help" },
+      { type: ActivityType.Playing, name: "on BTE-Germany.de" },
     ];
     setInterval(() => {
       client.user.setPresence({
-        activities: [
-          {
-            name: statusMessages[i]?.split("_")[1],
-            type: statusMessages[i]?.split("_")[0],
-          },
-        ],
+        activities: [statusMessages[i] ?? statusMessages[0]],
         status: "online",
-        afK: false,
+        afk: false,
       });
       i++;
       if (i === statusMessages.length) i = 0;
@@ -76,28 +71,7 @@ module.exports = class extends BaseEvent {
 
     BansHandler(client);
 
-    YoutubeHandler(client);
-
-    let currentDate = new Date();
-
-    let nextDate = new Date(
-      new Date().setHours(
-        currentDate.getHours() % 2 === 0
-          ? currentDate.getHours() + 2
-          : currentDate.getHours() + 1,
-        0,
-        0,
-        0
-      )
-    );
-
-    let timeout = nextDate.getTime() - currentDate.getTime();
-    client.Logger.info("Started waiting", "Instagram");
-
-    setTimeout(() => {
-      setInterval(() => {
-        InstagramHandler(client);
-      }, 2 * 60 * 60 * 1000);
-    }, timeout);
   }
 };
+
+

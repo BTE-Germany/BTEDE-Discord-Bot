@@ -1,4 +1,4 @@
-const { MessageEmbed } = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 
 module.exports = (client) => {
   client.Logger.info("Started Handler", "BansHandler");
@@ -10,19 +10,19 @@ module.exports = (client) => {
     });
     if (cases.length === 0) return;
 
-    cases.forEach(async (c) => {
+    for (const c of cases) {
       let guild =
         client.guilds.cache.get(client.config.guild) ||
         (await client.guilds.cache
           .get(client.config.guild)
           .catch(client.Logger.error));
-      if (!guild) return;
+      if (!guild) continue;
 
       let ban = await guild.bans.fetch(c.user).catch((e) => {});
       if (!ban) {
         c.deleted = true;
         await c.save();
-        return;
+        continue;
       }
 
       guild.bans
@@ -35,14 +35,15 @@ module.exports = (client) => {
               .catch(client.Logger.error));
           if (!log) return client.Logger.error("No Log in Bans.js");
 
-          let unbanEmbed = new MessageEmbed()
-            .setColor("GREEN")
+          let unbanEmbed = new EmbedBuilder()
+            .setColor(Colors.Green)
             .setTitle("✅ Unban")
             .setTimestamp()
-            .setFooter(
-              "BTE Germany",
-              "https://cdn.discordapp.com/icons/692825222373703772/a_e643511c769fd27a0f361d01c23f2cee.gif?size=1024"
-            )
+            .setFooter({
+              text: "BTE Germany",
+              iconURL:
+                "https://cdn.discordapp.com/icons/692825222373703772/a_e643511c769fd27a0f361d01c23f2cee.gif?size=1024",
+            })
             .addFields([
               {
                 name: "🚨 Moderator",
@@ -61,11 +62,11 @@ module.exports = (client) => {
               },
             ]);
 
-          log.send({ embeds: [unbanEmbed] });
+          await log.send({embeds: [unbanEmbed]});
 
           c.deleted = true;
           await c.save();
         });
-    });
+    }
   }, 5000);
 };

@@ -1,4 +1,4 @@
-const { Client, Collection, MessageEmbed } = require("discord.js"),
+const { Client, Collection, EmbedBuilder } = require("discord.js"),
   util = require("util");
 const Logger = require("./Logger.js");
 
@@ -8,17 +8,12 @@ class Bot extends Client {
 
     this.wait = util.promisify(setTimeout);
 
-    this.embed = class extends MessageEmbed {
+    this.embed = class extends EmbedBuilder {
       constructor(options) {
         super(options);
-        (this.color = "#347aeb"),
-          (this.timestamp = parseInt(console.timeStamp())),
-          (this.footer = {
-            text: "BTE Germany",
-            iconURL: this.interaction
-              ? this.interaction.guild.iconURL({ dynamic: true })
-              : null,
-          });
+        this.setColor("#347aeb");
+        this.setTimestamp(Date.now());
+        this.setFooter({ text: "BTE Germany" });
       }
     };
 
@@ -99,7 +94,7 @@ class Bot extends Client {
 
     this.usersInCreateProcess = new Collection();
 
-    this.config = require("../../config/config.js");
+    this.config = require("../config");
 
     this.RCON = new (require("./RCON.js"))(this.config.rcon);
   }

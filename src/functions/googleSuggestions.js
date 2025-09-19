@@ -1,4 +1,5 @@
-const { google } = require("googleapis");
+﻿const { google } = require("googleapis");
+const config = require("../config");
 
 const colors = {
   //              red   green  blue
@@ -25,7 +26,7 @@ module.exports = async (
   // auth
   const auth = new google.auth.GoogleAuth({
     keyFile: "secret.json",
-    scopes: "https://www.googleapis.com/auth/spreadsheets",
+    scopes: config?.services?.google?.sheetsScope || "https://www.googleapis.com/auth/spreadsheets",
   });
   const client = await auth.getClient();
   const googleSheets = google.sheets({ version: "v4", auth: client });

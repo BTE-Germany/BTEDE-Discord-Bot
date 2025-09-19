@@ -1,24 +1,30 @@
 (async function () {
-  const { Intents } = require("discord.js");
+
+  const { GatewayIntentBits, Partials } = require("discord.js");
   const Bot = require("./src/classes/Bot");
 
   const client = new Bot({
-    partials: ["MESSAGE", "CHANNEL"],
-    fetchAllMembers: false,
+    partials: [Partials.Message, Partials.Channel, Partials.GuildMember],
     intents: [
-      Intents.FLAGS.GUILDS,
-      Intents.FLAGS.GUILD_MESSAGES,
-      Intents.FLAGS.GUILD_MEMBERS,
-      Intents.FLAGS.GUILD_VOICE_STATES,
-      Intents.FLAGS.DIRECT_MESSAGES,
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildVoiceStates,
+      GatewayIntentBits.DirectMessages,
     ],
   });
 
   const mongoose = require("mongoose");
-  client.connection = await mongoose.connect(client.config.mongo.string, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  if (client.config?.mongo?.string) {
+    try {
+      client.connection = await mongoose.connect(client.config.mongo.string);
+      client.Logger.info("Connected to MongoDB", "DATABASE");
+    } catch (error) {
+      client.Logger.error(`Failed to connect to MongoDB: ${error.message}`);
+    }
+  } else {
+    client.Logger.warn("Skipping MongoDB connection - no connection string configured.");
+  }
 
   const {
     registerEvents,
@@ -29,6 +35,10 @@
   await registerCommands(client, "../commands");
   await registerInfoCommands(client);
   client.Logger.info(`Registered ${client.commands.size} commands`, "COMMANDS");
+
+  if (!client.config?.BOT_TOKEN) {
+    throw new Error("Discord bot token is missing. Set DISCORD_BOT_TOKEN or update the config.");
+  }
 
   await client.login(client.config.BOT_TOKEN);
 

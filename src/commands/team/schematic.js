@@ -1,4 +1,4 @@
-const {CommandInteraction, MessageAttachment} = require("discord.js");
+const { AttachmentBuilder } = require("discord.js");
 const Command = require("../../classes/Command.js");
 const axios = require("axios");
 const Bot = require("../../classes/Bot.js");
@@ -46,7 +46,7 @@ class schematicCommand extends Command {
 
     /**
      *
-     * @param {CommandInteraction} interaction
+     * @param {import("discord.js").CommandInteraction} interaction
      * @param {Bot} client
      */
 
@@ -111,7 +111,7 @@ class schematicCommand extends Command {
             await axios.get(`http://cloud.bte.ger:45655/api/schematics/download?name=${name}`, {responseType: "arraybuffer"})
                 .then(async ({data: schem}) => {
                     let {data: filetype} = await axios.get(`http://cloud.bte.ger:45655/api/schematics/filetype?name=${name}`);
-                    const attachment = new MessageAttachment(schem, name + filetype);
+                    const attachment = new AttachmentBuilder(schem, { name: name + filetype });
                     await interaction.editReply("Here you go!");
                     return client.channels.cache.get(interaction.channelId).send({content: "Kommentar: " + comment, files: [attachment]});
                 })

@@ -1,9 +1,4 @@
-const {
-  MessageEmbed,
-  Interaction,
-  Client,
-  CommandInteraction,
-} = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const Command = require("../../classes/Command.js");
 const Bot = require("../../classes/Bot.js");
 
@@ -117,7 +112,7 @@ module.exports = class extends Command {
 
   /**
    *
-   * @param {CommandInteraction} interaction
+   * @param {import("discord.js").CommandInteraction} interaction
    * @param {Bot} client
    */
 
@@ -147,13 +142,13 @@ module.exports = class extends Command {
         subArgs = subArgs.filter((fArg) => fArg.name != `subtitle${subNumber}`);
         if (!subText)
           return errorMsgs.push(
-            `**Titel ${subNumber}** hat keinen dazugehörigen Text und wurde deshalb nicht in das Embed aufgenommen. (\`${subArg.value}\`)`
+            `**Titel ${subNumber}** hat keinen dazugehoerigen Text und wurde deshalb nicht in das Embed aufgenommen. (\`${subArg.value}\`)`
           );
-        changelogEmbed.addField(
-          subArg.value.substr(0, 32),
-          subText.value.substr(0, 1024),
-          false
-        );
+        changelogEmbed.addFields({
+          name: subArg.value.substr(0, 32),
+          value: subText.value.substr(0, 1024),
+          inline: false,
+        });
       }
     });
 
@@ -162,7 +157,7 @@ module.exports = class extends Command {
         errorMsgs.push(
           `**Content ${
             subArg.name.split("content")[1]
-          }** hat keinen dazugehörigen Titel**und wurde deshalb nicht in das Embed aufgenommen. (\`${
+          }** hat keinen dazugehoerigen Titel**und wurde deshalb nicht in das Embed aufgenommen. (\`${
             subArg.value
           }\`)`
         );
@@ -177,15 +172,15 @@ module.exports = class extends Command {
       });
 
       let embeds = [
-        new MessageEmbed()
-          .setColor("GREEN")
+        new EmbedBuilder()
+          .setColor(Colors.Green)
           .setDescription("✅ Embed sent successfully."),
       ];
 
       if (errorMsgs.length != 0)
         embeds.push(
-          new MessageEmbed()
-            .setColor("#ff0000")
+          new EmbedBuilder()
+            .setColor(Colors.Red)
             .setDescription(":x: " + errorMsgs.join("\n\n:x: "))
         );
       await this.response(interaction, embeds);

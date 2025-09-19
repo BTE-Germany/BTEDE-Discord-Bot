@@ -1,13 +1,16 @@
-const BaseEvent = require("../classes/Event");
+﻿const BaseEvent = require("../classes/Event");
 const {
-  MessageEmbed,
+  EmbedBuilder,
   Message,
-  MessageActionRow,
-  MessageButton,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  Colors,
 } = require("discord.js");
 const Bot = require("../classes/Bot.js");
 const googleSuggestions = require("../functions/googleSuggestions.js");
 const { default: axios } = require("axios");
+const buildRegistrationRows = require("../structures/registrationRows.js");
 const steps = [
   "minecraft",
   "city",
@@ -16,7 +19,6 @@ const steps = [
   "referenceImages",
   "coordinates",
 ];
-// const wash = require("washyourmouthoutwithsoap");
 
 function generateDesc(titles, title) {
   let desc = "";
@@ -46,9 +48,9 @@ class MessageEvent extends BaseEvent {
       return msg.reply({
         content: ":x: This bot only works on guilds.",
         components: [
-          new MessageActionRow().addComponents(
-            new MessageButton()
-              .setStyle("LINK")
+          new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+              .setStyle(ButtonStyle.Link)
               .setLabel("BTE Germany Server")
               .setURL(
                 "https://discord.com/channels/692825222373703772/742824476869132328"
@@ -61,12 +63,14 @@ class MessageEvent extends BaseEvent {
 
     // changelog
     if (msg.content.startsWith("!changelog")) {
-      if (!msg.member.roles.cache.get("700788505936396388"))
+      const changelogRoleId =
+        client.config?.roles?.changelog || client.config?.roles?.team;
+      if (!changelogRoleId || !msg.member.roles.cache.get(changelogRoleId))
         return msg.reply({
           embeds: [
-            new MessageEmbed()
+            new EmbedBuilder()
               .setDescription(":x: Du hast keine Rechte auf diesen Befehl.")
-              .setColor("RED"),
+              .setColor(Colors.Red),
           ],
         });
 
@@ -76,9 +80,9 @@ class MessageEvent extends BaseEvent {
         .replace(">", "")
         .replace("#", "");
 
-      var changelogEmbed = new MessageEmbed()
+      var changelogEmbed = new EmbedBuilder()
         .setColor("#0366fc")
-        .setFooter("\u00ac BTE Germany - 2022")
+        .setFooter({ text: "© BTE-Germany" })
         .setTimestamp()
         .setTitle(msg.content.split(" ").slice(2).join(" ").split(" !| ")[0])
         .setThumbnail(
@@ -116,11 +120,11 @@ class MessageEvent extends BaseEvent {
           return msg.reply({
             content: "Eine \u00dcberschrift hat keinen Unterpunkt",
           });
-        changelogEmbed.addField(
-          titles[title].header,
-          generateDesc(titles, title),
-          false
-        ).catc;
+        changelogEmbed.addFields({
+          name: titles[title].header,
+          value: generateDesc(titles, title),
+          inline: false,
+        });
       }
       msg.guild.channels.cache.get(channel).send({ embeds: [changelogEmbed] });
       return msg.delete();
@@ -132,111 +136,90 @@ class MessageEvent extends BaseEvent {
         (x) => x.channel === msg.channel.id && x.mod === msg.author.id
       );
       if (cData && cData?.step) {
-        if (cData.step === "platform") {
-          let content = msg.content.toUpperCase();
-          if(content = "BEDROCK") cData.platform = "Bedrock"
-            else if (content = "JAVA") cData.platform = "Java"
-              else return msg.reply(":x: This plaform does not exist.");
-        }
-        // federal state / trial / rejected
-        if (cData.step === "federalState") {
-          let content = msg.content.toUpperCase();
-          if (content === "TR") cData.role = "trial";
-          else if (content === "RE") cData.role = "rejected";
-          else if (!client.config.federalPings[content])
-            return msg.reply(":x: This federal state does not exist.");
-        }
+        const currentStep = cData.step;
+        const input = msg.content.trim();
+        const uppercaseInput = input.toUpperCase();
 
-        // minecraft name lookup
-        if (cData.step === "minecraft") {
-          if(cData.platform === "Java") {
-          if (!/^[A-Za-z0-9_]{3,16}$/gm.test(msg.content))
-            return msg.reply(":x: This is not a valid minecraft username.");
-          let uuid = await axios
-            .get(
-              `https://api.mojang.com/users/profiles/minecraft/${msg.content.trim()}`
-            )
-            .catch(client.Logger.warn);
-          if (!uuid || !uuid?.data || !uuid?.data?.id)
-            return msg
-              .reply(":x: Couldn't find this minecraft account.")
+        if (currentStep === "platform") {
+          if (uppercaseInput === "BEDROCK") cData.platform = "Bedrock";
+          else if (uppercaseInput === "JAVA") cData.platform = "Java";
+          else return msg.reply(":x: This platform does not exist.");
+        } else if (currentStep === "federalState") {
+          if (uppercaseInput === "TR") cData.role = "trial";
+          else if (uppercaseInput === "RE") cData.role = "rejected";
+          else if (!client.config.federalPings?.[uppercaseInput])
+            return msg.reply(":x: This federal state does not exist.");
+        } else if (currentStep === "minecraft") {
+          if (cData.platform === "Java") {
+            if (!/^[A-Za-z0-9_]{3,16}$/gm.test(input))
+              return msg.reply(":x: This is not a valid minecraft username.");
+            let uuid = await axios
+              .get(`https://api.mojang.com/users/profiles/minecraft/${input}`)
               .catch(client.Logger.warn);
-          cData.uuid = uuid.data.id;
-          msg.channel.send({
-            content: `https://avatars.bte-germany.de/renders/body/${uuid?.data?.id}?overlay=true `,
-          });
-        }
-        else if(cData.platform === "Bedrock") {
-          let xuid = await axios
-            .get(
-              `https://api.geysermc.org/v2/xbox/xuid/${msg.content.trim()}`
-            )
-            .catch(client.Logger.warn);
-          if (!xuid || !xuid?.data || !xuid?.data?.xuid)
+            if (!uuid || !uuid?.data || !uuid?.data?.id)
               return msg
                 .reply(":x: Couldn't find this minecraft account.")
                 .catch(client.Logger.warn);
-          
-          let realxuid = xuid.data.xuid.toString();
-          let uuid = `00000000-0000-0000-${realxuid.substring(0, 4)}-${realxuid.substring(5, -1)}`;
-          cData.uuid = uuid;
-          msg.channel.send({
-            content: `https://mc-heads.net/body/${realxuid}/`
-          });
-        }
-        else {
-          return msg.reply(":x: You have not selected a platform.")
-        }
-        }
-      
+            cData.uuid = uuid.data.id;
+            msg.channel.send({
+              content: `https://avatars.bte-germany.de/renders/body/${uuid.data.id}?overlay=true`,
+            });
+          } else if (cData.platform === "Bedrock") {
+            let xuid = await axios
+              .get(`https://api.geysermc.org/v2/xbox/xuid/${input}`)
+              .catch(client.Logger.warn);
+            if (!xuid || !xuid?.data || !xuid?.data?.xuid)
+              return msg
+                .reply(":x: Couldn't find this minecraft account.")
+                .catch(client.Logger.warn);
 
-        cData[cData.step] = msg.content;
+            let realxuid = xuid.data.xuid.toString();
+            const uuid = `00000000-0000-0000-${realxuid.slice(0, 4)}-${realxuid.slice(4)}`;
+            cData.uuid = uuid;
+            msg.channel.send({
+              content: `https://mc-heads.net/body/${realxuid}/`,
+            });
+          } else {
+            return msg.reply(":x: You have not selected a platform.");
+          }
+        }
 
-        // edit buttons
+        if (currentStep !== "platform") {
+          cData[currentStep] = input;
+        }
+
         let m = await msg.channel.messages
           .fetch(cData.msg)
           .catch(client.Logger.warn);
         if (!m) return msg.reply(":x: Error: Couldn't Fetch Message");
 
-        // update buttons
-        let sRow = m.components;
-        let selectRow = sRow;
-        selectRow.forEach(async (row) => {
-          row.components.forEach((component) => {
-            if (
-              component.customId === `cp_${cData.step}` &&
-              component.style === "PRIMARY"
-            ) {
-              component.setStyle("SUCCESS");
-            }
-          });
-        });
+        const completedSteps = steps
+          .filter((stepName) => Boolean(cData[stepName]))
+          .concat(cData.platform ? ["platform"] : []);
 
-        // onward
         if (cData.onward) {
-          let currentStepIndex = steps.indexOf(cData.step);
-          if (currentStepIndex != steps.length) {
-            if (steps[currentStepIndex + 1]) {
-              cData.step = steps[currentStepIndex + 1];
-
-              selectRow.forEach(async (row) => {
-                row.components.forEach((component) => {
-                  if (component.customId === `cp_${cData.step}`) {
-                    component.setStyle("PRIMARY");
-                  }
-                });
-              });
+          if (currentStep === "platform") {
+            cData.step = steps[0];
+          } else {
+            const currentStepIndex = steps.indexOf(currentStep);
+            if (currentStepIndex !== -1) {
+              if (currentStepIndex + 1 < steps.length) {
+                cData.step = steps[currentStepIndex + 1];
+              } else {
+                cData.step = "finish";
+              }
             }
           }
         }
 
-        m.edit({ components: selectRow });
+        await m.edit({
+          components: buildRegistrationRows(cData.step, {
+            onwardEnabled: Boolean(cData.onward),
+            completedSteps,
+          }),
+        });
 
-        // save data
-        client.usersInCreateProcess.delete(cData.id);
         client.usersInCreateProcess.set(cData.id, cData);
-
-        // delete information
         await msg.delete();
       }
     }
@@ -284,13 +267,13 @@ if (content.includes("http://") || content.includes("https://")) {
           if (log)
             log.send({
               embeds: [
-                new MessageEmbed()
-                  .setColor("#ff0000")
+                new EmbedBuilder()
+                  .setColor(Colors.Red)
                   .setTimestamp()
-                  .setFooter(
-                    msg.guild.name,
-                    msg.guild.iconURL({ dynamic: true })
-                  )
+        .setFooter({ text: "© BTE-Germany" })
+                    text: msg.guild.name,
+                    iconURL: msg.guild.iconURL({ dynamic: true }) ?? undefined,
+                  })
                   .setTitle(":wastebasket: Message Deleted")
                   .addFields([
                     {
@@ -331,16 +314,16 @@ if (content.includes("http://") || content.includes("https://")) {
       let suggestionsCount = await client.schemas.suggestion.countDocuments();
       let suggId = suggestionsCount + 1 + 255;
 
-      let suggestionEmbed = new MessageEmbed()
-        .setFooter("© BTE-Germany")
+        let suggestionEmbed = new EmbedBuilder()
+        .setFooter({ text: "© BTE-Germany" })
         .setTimestamp()
-        .setColor("#9cada9")
-        .setAuthor(
-          msg.member?.nickname?.split(" [")?.[0] || msg.author.username,
-          msg.author.avatarURL({ dynamic: true })
-        )
+        .setColor(0x9cada9)
+        .setAuthor({
+          name: msg.member?.nickname?.split(" [")?.[0] || msg.author.username,
+          iconURL: msg.author.avatarURL({ dynamic: true }) ?? undefined,
+        })
         .setDescription(`**#${suggId}** - ${msg.content.trim()}`)
-        .addField("Status", "Open", false);
+        .addFields({ name: "Status", value: "Open", inline: false });
 
       // send suggestion embed
       msg.channel.send({ embeds: [suggestionEmbed] }).then(async (message) => {
@@ -369,7 +352,7 @@ if (content.includes("http://") || content.includes("https://")) {
           .startThread({
             name: `${suggId} - Discussion`,
             reason: "Suggestion discussion",
-            autoArchiveDuration: "MAX",
+            autoArchiveDuration: 10080,
           })
           .catch(client.Logger.warn);
 
@@ -386,11 +369,11 @@ if (content.includes("http://") || content.includes("https://")) {
         msg.delete().catch(client.Logger.error);
 
         // dm embed
-        let suggCreatedEmbed = new MessageEmbed()
+        let suggCreatedEmbed = new EmbedBuilder()
           .setDescription(
             `You're suggestion (\`${suggId}\`) in ${msg.guild.name} was created, you can find it [here](${message.url}).`
           )
-          .setColor("GREEN");
+          .setColor(Colors.Green);
 
         // dm
         msg.member.send({ embeds: [suggCreatedEmbed] }).catch((e) => {});
@@ -404,3 +387,4 @@ if (content.includes("http://") || content.includes("https://")) {
 }
 
 module.exports = MessageEvent;
+

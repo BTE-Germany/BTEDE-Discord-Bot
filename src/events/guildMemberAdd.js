@@ -1,11 +1,9 @@
 const {
-  MessageEmbed,
-  GuildMemberManager,
-  GuildAuditLogs,
-  GuildMember,
-  MessageActionRow,
-  Message,
-  MessageButton,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  Colors,
 } = require("discord.js");
 const BaseEvent = require("../classes/Event.js");
 const Bot = require("../classes/Bot.js");
@@ -18,7 +16,7 @@ class GuildMemberAddEvent extends BaseEvent {
   /**
    *
    * @param {Bot} client
-   * @param {GuildMember} member
+   * @param {import("discord.js").GuildMember} member
    */
 
   async run(client, member) {
@@ -34,12 +32,15 @@ class GuildMemberAddEvent extends BaseEvent {
      if (joinLog)
       joinLog.send({
         embeds: [
-          new MessageEmbed()
+          new EmbedBuilder()
             .setColor(member.user.accentColor)
             .setThumbnail(member.user.avatarURL({ dynamic: true }))
             .setImage(member.user.bannerURL({ dynamic: true }))
             .setTimestamp()
-            .setFooter(member.user.id, member.guild.iconURL({ dynamic: true }))
+            .setFooter({
+              text: member.user.id,
+              iconURL: member.guild.iconURL({ dynamic: true }) ?? undefined,
+            })
             .setDescription(`<@!${member.user.id}> (${member.user.tag})`)
             .setTitle("📈 New User"),
         ],
@@ -52,14 +53,15 @@ class GuildMemberAddEvent extends BaseEvent {
       type: "mute",
     });
     if (c) {
-      let muteEmbed = new MessageEmbed()
-        .setColor("ORANGE")
+      let muteEmbed = new EmbedBuilder()
+        .setColor(Colors.Orange)
         .setTitle("🔇 Mute")
         .setTimestamp()
-        .setFooter(
-          "BTE Germany",
-          "https://cdn.discordapp.com/icons/692825222373703772/a_e643511c769fd27a0f361d01c23f2cee.gif?size=1024"
-        )
+        .setFooter({
+          text: "BTE Germany",
+          iconURL:
+            "https://cdn.discordapp.com/icons/692825222373703772/a_e643511c769fd27a0f361d01c23f2cee.gif?size=1024",
+        })
         .addFields([
           {
             name: "🚨 Moderator",
@@ -117,24 +119,24 @@ class GuildMemberAddEvent extends BaseEvent {
         generalChat.send({
           content: `<a:btede:853745991525859338> Herzlich Willkommen <@!${userId}> bei **BTE-Germany**!`,
           components: [
-            new MessageActionRow().addComponents([
-              new MessageButton()
+            new ActionRowBuilder().addComponents([
+              new ButtonBuilder()
                 .setLabel("Informationen")
-                .setStyle("LINK")
+                .setStyle(ButtonStyle.Link)
                 .setURL(
                   "https://discord.com/channels/692825222373703772/796403957135573072/882324083285573682"
                 ),
 
-              new MessageButton()
+              new ButtonBuilder()
                 .setLabel("FAQ")
-                .setStyle("LINK")
+                .setStyle(ButtonStyle.Link)
                 .setURL(
                   "https://discord.com/channels/692825222373703772/796404244282212412/842070909460021309"
                 ),
 
-              new MessageButton()
+              new ButtonBuilder()
                 .setLabel("Fortschrittskarte")
-                .setStyle("LINK")
+                .setStyle(ButtonStyle.Link)
                 .setURL("https://bte-germany.de/map"),
             ]),
           ],

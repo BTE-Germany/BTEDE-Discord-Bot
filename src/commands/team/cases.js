@@ -1,9 +1,3 @@
-const {
-  MessageEmbed,
-  Interaction,
-  Client,
-  CommandInteraction,
-} = require("discord.js");
 const Command = require("../../classes/Command.js");
 const Bot = require("../../classes/Bot.js");
 
@@ -46,7 +40,7 @@ class CasesCommand extends Command {
 
   /**
    *
-   * @param {CommandInteraction} interaction
+   * @param {import("discord.js").CommandInteraction} interaction
    * @param {Bot} client
    */
 
@@ -70,10 +64,10 @@ class CasesCommand extends Command {
     });
 
     let casesEmbed = new this.embed()
-      .setAuthor(
-        member?.user?.username || member,
-        member?.user?.avatarURL({ dynamic: true }) || null
-      )
+      .setAuthor({
+        name: member?.user?.username || member,
+        iconURL: member?.user?.avatarURL({ dynamic: true }) || undefined,
+      })
       .setDescription(
         `${member?.user?.tag || member} has ${userCases.length} Case${
           userCases.length === 1 ? "" : "s"
@@ -81,13 +75,13 @@ class CasesCommand extends Command {
       );
 
     userCases.forEach((userCase) => {
-      casesEmbed.addField(
-        `${userCase.deleted ? "~~" : ""}Case: ${userCase.id}${
+      casesEmbed.addFields({
+        name: `${userCase.deleted ? "~~" : ""}Case: ${userCase.id}${
           userCase.deleted ? "~~" : ""
         }`,
-        `Type: \`${userCase.type}\`\nReason: ||${userCase.reason}||`,
-        true
-      );
+        value: `Type: \`${userCase.type}\`\nReason: ||${userCase.reason}||`,
+        inline: true,
+      });
     });
 
     return this.response(interaction, casesEmbed);

@@ -102,13 +102,13 @@ class MuteCommand extends Command {
       if (mod.roles.highest.position <= member.roles.highest.position)
         return this.error(
           interaction,
-          "Du kannst den User nicht muten, da du nicht höher als er gerankt bist."
+          "Du kannst den User nicht muten, da du nicht hoeher als er gerankt bist."
         );
       if (member.user.id === mod.user.id)
         return this.error(interaction, "WARUM!??!?!");
       if (
-        member.user.id ===
-        client.user.id /*|| member.user.id === "552530299423293441"*/
+        member.user.id === client.user.id ||
+        client.config.protectedUsers?.includes(member.user.id)
       )
         return this.error(interaction, "This user can't be muted.");
       if (member.roles.cache.get(client.config.roles.muted))

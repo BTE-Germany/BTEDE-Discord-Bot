@@ -1,14 +1,9 @@
-const {
-  MessageEmbed,
-  Interaction,
-  Client,
-  CommandInteraction,
-} = require("discord.js");
+const { EmbedBuilder } = require("discord.js");
 const Command = require("../classes/Command.js");
 const Bot = require("../classes/Bot.js");
 const IDS = require("./activites.json");
 
-const help = new MessageEmbed()
+const help = new EmbedBuilder()
   .setColor("#0099ff")
   .setTitle("Activity")
   .setDescription("Usage: '/activity <activity>'")
@@ -171,3 +166,5 @@ module.exports = class extends Command {
     }
   }
 };
+
+

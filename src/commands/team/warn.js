@@ -84,15 +84,15 @@ class WarnCommand extends Command {
     if (mod.roles.highest.position <= member.roles.highest.position)
       return this.error(
         interaction,
-        "Du kannst den User nicht warnen, da du nicht höher als er gerankt bist."
+        "Du kannst den User nicht warnen, da du nicht hoeher als er gerankt bist."
       );
     if (member.user.id === mod.user.id)
       return this.error(interaction, "WARUM!??!?!");
     if (
       member.user.id === client.user.id ||
-      member.user.id === "552530299423293441"
+      client.config.protectedUsers?.includes(member.user.id)
     )
-      return this.error(interaction, "NÖÖÖ");
+      return this.error(interaction, "NOeOeOe");
 
     let caseCount = await this.client.schemas.case.find({});
 

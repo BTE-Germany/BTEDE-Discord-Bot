@@ -94,7 +94,10 @@ class BanCommand extends Command {
       return this.error(interaction, "You must provide a valid duration.");
 
     if (userId === mod.user.id) return this.error(interaction, "WARUM!??!?!");
-    if (userId === client.user.id || userId === "552530299423293441")
+    if (
+      userId === client.user.id ||
+      client.config.protectedUsers?.includes(userId)
+    )
       return this.error(interaction, "You can't ban me or my dev.");
 
     let caseCount = await this.client.schemas.case.find({});

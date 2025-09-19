@@ -1,9 +1,3 @@
-const {
-  MessageEmbed,
-  Interaction,
-  Client,
-  CommandInteraction,
-} = require("discord.js");
 const Command = require("../classes/Command.js");
 const util = require("minecraft-server-util");
 const Bot = require("../classes/Bot.js");

@@ -1,10 +1,4 @@
-const {
-  MessageEmbed,
-  Interaction,
-  Client,
-  CommandInteraction,
-  SnowflakeUtil,
-} = require("discord.js");
+const { EmbedBuilder, Colors } = require("discord.js");
 const Command = require("../../classes/Command.js");
 const Bot = require("../../classes/Bot.js");
 
@@ -33,7 +27,7 @@ class UnbanCommand extends Command {
 
   /**
    *
-   * @param {CommandInteraction} interaction
+   * @param {import("discord.js").CommandInteraction} interaction
    * @param {Bot} client
    */
 
@@ -65,14 +59,15 @@ class UnbanCommand extends Command {
         c.deleted = true;
         await c.save();
 
-        let unbanEmbed = new MessageEmbed()
-          .setColor("GREEN")
+        let unbanEmbed = new EmbedBuilder()
+          .setColor(Colors.Green)
           .setTitle("✅ Unban")
           .setTimestamp()
-          .setFooter(
-            "BTE Germany",
-            "https://cdn.discordapp.com/icons/692825222373703772/a_e643511c769fd27a0f361d01c23f2cee.gif?size=1024"
-          )
+          .setFooter({
+            text: "BTE Germany",
+            iconURL:
+              "https://cdn.discordapp.com/icons/692825222373703772/a_e643511c769fd27a0f361d01c23f2cee.gif?size=1024",
+          })
           .addFields([
             {
               name: "🚨 Moderator",
@@ -100,7 +95,7 @@ class UnbanCommand extends Command {
 
         let unbanResponseEmbed = new this.embed()
           .setDescription(`The user has been **unbanned**.`)
-          .setColor("GREEN");
+          .setColor(Colors.Green);
 
         return this.response(interaction, unbanResponseEmbed);
       })
