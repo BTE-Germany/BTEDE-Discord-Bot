@@ -5,6 +5,7 @@ class CrosspostStore {
     this.model = model;
     this.targetChannelId = targetChannelId;
     this.map = new Map(); // sourceMessageId -> { embedMessageId, contentMessageId, threadId }
+    this.lastContentCache = new Map(); // threadId -> contentMessageId
   }
 
   async load() {
@@ -125,6 +126,42 @@ class CrosspostStore {
     }
 
     return result;
+  }
+
+  async getLastContentMessage(threadId, targetChannel) {
+    const cachedId = this.lastContentCache.get(threadId);
+    if (cachedId) {
+      const msg = await targetChannel.messages.fetch(cachedId).catch(() => null);
+      if (msg) return msg;
+      this.lastContentCache.delete(threadId);
+    }
+
+    const records = this.getByThread(threadId);
+    let latest = null;
+    for (const record of records) {
+      if (!record.contentMessageId) continue;
+      const msg = await targetChannel.messages.fetch(record.contentMessageId).catch(() => null);
+      if (!msg) continue;
+      if (!latest || msg.createdTimestamp > latest.createdTimestamp) {
+        latest = msg;
+      }
+    }
+
+    if (latest) {
+      this.lastContentCache.set(threadId, latest.id);
+    }
+    return latest;
+  }
+
+  updateLastContent(threadId, contentMessageId) {
+    if (contentMessageId) this.lastContentCache.set(threadId, contentMessageId);
+  }
+
+  clearLastContent(threadId, contentMessageId) {
+    if (!this.lastContentCache.has(threadId)) return;
+    if (!contentMessageId || this.lastContentCache.get(threadId) === contentMessageId) {
+      this.lastContentCache.delete(threadId);
+    }
   }
 
   async prune(pruneDays) {
