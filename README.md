@@ -20,6 +20,7 @@ Umgebungsvariablen (aus Infisical):
 - `DISCORD_PROGRESS_CHANNEL_ID` - Channel, der die Crossposts erhalten soll
 - `DISCORD_PROGRESS_FORUM_ID` - Forum, das überwacht werden soll
 - `MONGO_URI` - MongoDB connection string für Persistenz der Crosspost Mappings
+- `MONGO_REMOVE_AFTER_DAYS` - Anzahl Tage nach denen Crosspost-Records gelöscht werden (negativ: alle löschen, `0`: deaktiviert)
 
 ## Verhalten
 

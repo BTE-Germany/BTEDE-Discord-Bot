@@ -6,6 +6,8 @@ const loadConfig = () => {
   const targetChannelId = process.env.DISCORD_PROGRESS_CHANNEL_ID;
   const forumChannelId = process.env.DISCORD_PROGRESS_FORUM_ID;
   const mongoUri = process.env.MONGO_URI;
+  const pruneDaysRaw = process.env.MONGO_REMOVE_AFTER_DAYS;
+  const pruneDays = pruneDaysRaw !== undefined && pruneDaysRaw !== "" ? Number(pruneDaysRaw) : 0;
 
   if (!token) {
     throw new Error("Missing bot token. Set DISCORD_BOT_TOKEN.");
@@ -23,7 +25,11 @@ const loadConfig = () => {
     throw new Error("Missing database configuration. Set MONGO_URI.");
   }
 
-  return { token, guildId, targetChannelId, forumChannelId, mongoUri };
+  if (Number.isNaN(pruneDays)) {
+    throw new Error("MONGO_REMOVE_AFTER_DAYS must be a number (can be negative to delete all, 0 to disable).");
+  }
+
+  return { token, guildId, targetChannelId, forumChannelId, mongoUri, pruneDays };
 };
 
 module.exports = { loadConfig };

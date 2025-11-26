@@ -13,6 +13,7 @@ const start = async () => {
 
   const store = new CrosspostStore(Crosspost, config.targetChannelId);
   await store.load();
+  await store.prune(config.pruneDays);
 
   const { client, ensureTargetChannel } = createDiscordClient(config.targetChannelId);
 

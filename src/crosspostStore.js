@@ -60,6 +60,45 @@ class CrosspostStore {
       throw error;
     }
   }
+
+  async prune(pruneDays) {
+    if (pruneDays === 0) return; // disabled
+
+    if (pruneDays < 0) {
+      try {
+        await this.model.deleteMany({ channelId: this.targetChannelId });
+        this.map.clear();
+        logger.info("Pruned all crosspost records (pruneDays < 0).");
+      } catch (error) {
+        logger.error("Failed to prune all crosspost records:", error);
+      }
+      return;
+    }
+
+    const cutoff = new Date(Date.now() - pruneDays * 24 * 60 * 60 * 1000);
+    try {
+      const result = await this.model.deleteMany({
+        channelId: this.targetChannelId,
+        updatedAt: { $lt: cutoff },
+      });
+      if (result.deletedCount) {
+        let removed = 0;
+        for (const [threadId] of this.map) {
+          // Without timestamps in the map, conservatively drop if missing in DB.
+          // We'll reload from DB after pruning to stay consistent.
+          removed += 1;
+        }
+        this.map.clear();
+        const remainingRecords = await this.model.find({ channelId: this.targetChannelId }).lean();
+        remainingRecords.forEach((record) => this.map.set(record.threadId, record.messageId));
+        logger.info(
+          `Pruned ${result.deletedCount} crosspost records older than ${pruneDays} days. Reloaded ${remainingRecords.length} active records.`
+        );
+      }
+    } catch (error) {
+      logger.error("Failed to prune stale crosspost records:", error);
+    }
+  }
 }
 
 module.exports = { CrosspostStore };
