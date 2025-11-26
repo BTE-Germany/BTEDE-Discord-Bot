@@ -14,6 +14,16 @@ const start = async () => {
   const store = new CrosspostStore(Crosspost, config.targetChannelId);
   await store.load();
   await store.prune(config.pruneDays);
+  if (config.pruneDays !== 0) {
+    const intervalMs = 12 * 60 * 60 * 1000;
+    setInterval(async () => {
+      try {
+        await store.prune(config.pruneDays);
+      } catch (error) {
+        logger.error("Scheduled prune failed:", error);
+      }
+    }, intervalMs);
+  }
 
   const { client, ensureTargetChannel } = createDiscordClient(config.targetChannelId);
 
