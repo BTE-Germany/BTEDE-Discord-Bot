@@ -31,3 +31,16 @@ Umgebungsvariablen (aus Infisical):
 - Speichert eine Crosspost-Map in der Datenbank
 - Zusätzliche Action Queue verhindert desynchronisation
 - Jeder Thread erhält eine zufällige Farbe, die alle dazugehörigen Nachrichten bekommen
+
+## Docker
+
+Das beigefügte Dockerfile baut ein Image mit Infisical-CLI und startet den Bot via `infisical run -- node index.js`.
+
+Build:
+```bash
+docker build -t btede-bot .
+```
+Run (Infisical-Login/Config bereitstellen, z.B. via gemountetem ~/.infisical oder env-Variablen):
+```bash
+docker run --env-file .env -v $HOME/.infisical:/root/.infisical -it btede-bot
+```
