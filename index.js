@@ -1,8 +1,9 @@
 const { loadConfig } = require("./src/config");
-const { connectDatabase, Crosspost } = require("./src/db");
+const { connectDatabase, Crosspost, ThreadColor } = require("./src/db");
 const { CrosspostStore } = require("./src/crosspostStore");
 const { createDiscordClient } = require("./src/client");
 const { registerHandlers } = require("./src/handlers");
+const { ThreadColorStore } = require("./src/threadColorStore");
 const logger = require("./src/logger");
 
 const start = async () => {
@@ -13,6 +14,10 @@ const start = async () => {
   const store = new CrosspostStore(Crosspost, config.targetChannelId);
   await store.load();
   await store.prune(config.pruneDays);
+
+  const colorStore = new ThreadColorStore(ThreadColor);
+  // no pruning needed for colors; they are deleted on thread removal or when crossposts are gone
+
   if (config.pruneDays !== 0) {
     const intervalMs = 12 * 60 * 60 * 1000;
     setInterval(async () => {
@@ -31,6 +36,7 @@ const start = async () => {
     config,
     ensureTargetChannel,
     store,
+    colorStore,
   });
 
   await client.login(config.token);

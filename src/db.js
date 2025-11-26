@@ -16,9 +16,22 @@ const crosspostSchema = new mongoose.Schema(
 
 const Crosspost = mongoose.model("Crosspost", crosspostSchema);
 
+const threadColorSchema = new mongoose.Schema(
+    {
+        threadId: {type: String, required: true, unique: true},
+        color: {type: String, required: true},
+    },
+    {
+        timestamps: true,
+        versionKey: false
+    }
+);
+
+const ThreadColor = mongoose.model("ThreadColor", threadColorSchema);
+
 const connectDatabase = async (mongoUri) => {
     await mongoose.connect(mongoUri);
     logger.info("Connected to MongoDB.");
 };
 
-module.exports = {connectDatabase, Crosspost};
+module.exports = {connectDatabase, Crosspost, ThreadColor};

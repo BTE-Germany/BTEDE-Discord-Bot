@@ -9,7 +9,7 @@ const isTargetThread = (thread, config) => {
     return true;
 };
 
-const registerHandlers = ({client, config, ensureTargetChannel, store}) => {
+const registerHandlers = ({client, config, ensureTargetChannel, store, colorStore}) => {
     const threadQueues = new Map();
 
     const runInThreadQueue = (threadId, task) => {
@@ -23,7 +23,8 @@ const registerHandlers = ({client, config, ensureTargetChannel, store}) => {
         return next;
     };
     const sendCrosspost = async ({sourceId, thread, sourceMessage, target, isReply}) => {
-    const embed = buildHeaderEmbed(thread, isReply);
+    const color = await colorStore.ensure(thread.id);
+    const embed = buildHeaderEmbed(thread, isReply, color);
     const embedMessage = await target.send({ embeds: [embed] });
 
     const contentPayload = await buildContentPayload(sourceMessage);
@@ -70,7 +71,8 @@ const registerHandlers = ({client, config, ensureTargetChannel, store}) => {
             return sendCrosspost({sourceId, thread, sourceMessage, target, isReply});
         }
 
-        const embed = buildHeaderEmbed(thread, isReply);
+        const color = await colorStore.ensure(thread.id);
+        const embed = buildHeaderEmbed(thread, isReply, color);
         await pair.embed.edit({embeds: [embed]});
 
     const contentPayload = await buildContentPayload(sourceMessage);
@@ -89,6 +91,11 @@ const registerHandlers = ({client, config, ensureTargetChannel, store}) => {
         if (pair.content) await pair.content.delete().catch((err) => logger.warn(`Failed to delete content ${pair.content.id}:`, err));
         await store.remove(sourceId);
         store.clearLastContent(pair.threadId, pair.content?.id);
+        // If no crossposts remain for the thread, drop its color
+        const remaining = store.getByThread(pair.threadId || "");
+        if (!remaining.length) {
+            await colorStore.delete(pair.threadId);
+        }
         logger.info(`Deleted crosspost ${sourceId}${reason ? ` (${reason})` : ""}.`);
     };
 
@@ -226,6 +233,7 @@ const registerHandlers = ({client, config, ensureTargetChannel, store}) => {
                     await store.remove(reply.sourceMessageId);
                 }
                 await store.removeByThread(thread.id);
+                await colorStore.delete(thread.id);
             } catch (error) {
                 logger.error(`Failed to delete crosspost for removed thread ${thread.id}:`, error);
             }

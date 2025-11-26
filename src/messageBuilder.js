@@ -33,7 +33,7 @@ const downloadAttachment = async (attachment) => {
     }
 };
 
-const buildHeaderEmbed = (thread, isReply = true) => {
+const buildHeaderEmbed = (thread, isReply = true, color) => {
     const authorLabel = thread.ownerId ? `<@${thread.ownerId}>` : "Jemand";
     const threadUrl = `https://discord.com/channels/${thread.guildId}/${thread.id}`;
 
@@ -43,9 +43,9 @@ const buildHeaderEmbed = (thread, isReply = true) => {
         .setTimestamp(new Date());
 
     if (isReply) {
-        embed.setDescription(`${authorLabel} hat in ${threadUrl} geantwortet:`).setColor("#ff0000");
+        embed.setDescription(`${authorLabel} hat in ${threadUrl} geantwortet:`).setColor(color);
     } else {
-        embed.setDescription(`${authorLabel} hat neuen Progress in ${threadUrl} gepostet:`).setColor("#00b0f4");
+        embed.setDescription(`${authorLabel} hat neuen Progress in ${threadUrl} gepostet:`).setColor(color);
     }
 
     return embed;
