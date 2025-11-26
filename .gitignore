@@ -1,13 +1,5 @@
-config/
-!src/config/
-.idea/
-secret.json
-data/
-*.sqlite
 node_modules/
-lang/
-webAPI.js
-package-lock.json
-/.env*
-!/.env.example
-/.infisical.json
+.env
+.env.*
+!.env.example
+.infisical.json

@@ -1,46 +1,33 @@
-(async function () {
+const { loadConfig } = require("./src/config");
+const { connectDatabase, Crosspost } = require("./src/db");
+const { CrosspostStore } = require("./src/crosspostStore");
+const { createDiscordClient } = require("./src/client");
+const { registerHandlers } = require("./src/handlers");
+const { buildCrosspostPayload, getStarterMessage } = require("./src/payload");
 
-  const { GatewayIntentBits, Partials } = require("discord.js");
-  const Bot = require("./src/classes/Bot");
+const start = async () => {
+  const config = loadConfig();
 
-  const client = new Bot({
-    partials: [Partials.Message, Partials.Channel, Partials.GuildMember],
-    intents: [
-      GatewayIntentBits.Guilds,
-      GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.GuildMembers,
-      GatewayIntentBits.GuildVoiceStates,
-      GatewayIntentBits.DirectMessages,
-    ],
+  await connectDatabase(config.mongoUri);
+
+  const store = new CrosspostStore(Crosspost, config.targetChannelId);
+  await store.load();
+
+  const { client, ensureTargetChannel } = createDiscordClient(config.targetChannelId);
+
+  registerHandlers({
+    client,
+    config,
+    ensureTargetChannel,
+    store,
+    buildCrosspostPayload,
+    getStarterMessage,
   });
 
-  const mongoose = require("mongoose");
-  if (client.config?.mongo?.string) {
-    try {
-      client.connection = await mongoose.connect(client.config.mongo.string);
-      client.Logger.info("Connected to MongoDB", "DATABASE");
-    } catch (error) {
-      client.Logger.error(`Failed to connect to MongoDB: ${error.message}`);
-    }
-  } else {
-    client.Logger.warn("Skipping MongoDB connection - no connection string configured.");
-  }
+  await client.login(config.token);
+};
 
-  const {
-    registerEvents,
-    registerCommands,
-    registerInfoCommands,
-  } = require("./src/functions/register");
-  await registerEvents(client, "../events");
-  await registerCommands(client, "../commands");
-  await registerInfoCommands(client);
-  client.Logger.info(`Registered ${client.commands.size} commands`, "COMMANDS");
-
-  if (!client.config?.BOT_TOKEN) {
-    throw new Error("Discord bot token is missing. Set DISCORD_BOT_TOKEN or update the config.");
-  }
-
-  await client.login(client.config.BOT_TOKEN);
-
-  require("./src/messageUpdateAPI.js")(client);
-})();
+start().catch((error) => {
+  console.error("Failed to start bot:", error);
+  process.exit(1);
+});
