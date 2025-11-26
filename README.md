@@ -26,12 +26,7 @@ Umgebungsvariablen (aus Infisical):
 
 - Wartet auf neue Forum Posts und crossposted diese dann mit einem Header in den konfigurierten Channel
 - Synchronisiert Bearbeitungen an Inhalt und Titel
+- Selbiges auch für Antworten in Forum Threads
 - Löscht den Crosspost, wenn das Original gelöscht wird
 - Speichert eine Crosspost-Map in der Datenbank
-
-## Offene Fragen
-
-- Wenn im crosspost channel die message gelöscht wurde und das Forum bearbeitet wird, Post neu erstellen?
-- Verhalten bei Antworten in Forum Channels
-- Verhalten bei Antworten in Forum Channels, die als REPLY gestellt werden
-- SuppressNotifications (@silent) oder besser auf Embeds umstellen?
+- Zusätzliche Action Queue verhindert desynchronisation
