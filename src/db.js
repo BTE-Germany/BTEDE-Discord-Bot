@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const logger = require("./logger");
 
 const crosspostSchema = new mongoose.Schema(
   {
@@ -13,7 +14,7 @@ const Crosspost = mongoose.model("Crosspost", crosspostSchema);
 
 const connectDatabase = async (mongoUri) => {
   await mongoose.connect(mongoUri);
-  console.log("Connected to MongoDB.");
+  logger.info("Connected to MongoDB.");
 };
 
 module.exports = { connectDatabase, Crosspost };

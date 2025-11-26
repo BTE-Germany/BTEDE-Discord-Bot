@@ -1,4 +1,5 @@
 const { Client, GatewayIntentBits, Partials, Events } = require("discord.js");
+const logger = require("./logger");
 
 const createDiscordClient = (targetChannelId) => {
   const client = new Client({
@@ -16,15 +17,15 @@ const createDiscordClient = (targetChannelId) => {
         targetChannel = fetched;
         return targetChannel;
       }
-      console.error(`Configured target channel ${targetChannelId} is not text-based or not accessible.`);
+      logger.error(`Configured target channel ${targetChannelId} is not text-based or not accessible.`);
     } catch (error) {
-      console.error(`Failed to fetch target channel ${targetChannelId}:`, error);
+      logger.error(`Failed to fetch target channel ${targetChannelId}:`, error);
     }
     return null;
   };
 
   client.once(Events.ClientReady, async (readyClient) => {
-    console.log(`Logged in as ${readyClient.user.tag}. Watching for new forum posts...`);
+    logger.info(`Logged in as ${readyClient.user.tag}. Watching for new forum posts...`);
     await ensureTargetChannel();
   });
 

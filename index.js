@@ -4,6 +4,7 @@ const { CrosspostStore } = require("./src/crosspostStore");
 const { createDiscordClient } = require("./src/client");
 const { registerHandlers } = require("./src/handlers");
 const { buildCrosspostPayload, getStarterMessage } = require("./src/payload");
+const logger = require("./src/logger");
 
 const start = async () => {
   const config = loadConfig();
@@ -28,6 +29,6 @@ const start = async () => {
 };
 
 start().catch((error) => {
-  console.error("Failed to start bot:", error);
+  logger.error("Failed to start bot:", error);
   process.exit(1);
 });

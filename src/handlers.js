@@ -1,4 +1,5 @@
 const { Events } = require("discord.js");
+const logger = require("./logger");
 
 const isTargetThread = (thread, config) => {
   if (!thread?.isThread?.()) return false;
@@ -21,9 +22,9 @@ const registerHandlers = ({ client, config, ensureTargetChannel, store, buildCro
     try {
       const sent = await channel.send(payload);
       await store.set(thread.id, sent.id);
-      console.log(`Crossposted forum thread ${thread.id} to ${channel.id}`);
+      logger.info(`Crossposted forum thread ${thread.id} to ${channel.id}`);
     } catch (error) {
-      console.error(`Failed to crosspost thread ${thread.id}:`, error);
+      logger.error(`Failed to crosspost thread ${thread.id}:`, error);
     }
   });
 
@@ -41,14 +42,14 @@ const registerHandlers = ({ client, config, ensureTargetChannel, store, buildCro
 
       if (crosspostMessage) {
         await crosspostMessage.edit(payload);
-        console.log(`Updated crosspost header for thread ${newThread.id} (message ${crosspostMessage.id}).`);
+        logger.info(`Updated crosspost header for thread ${newThread.id} (message ${crosspostMessage.id}).`);
       } else {
         const sent = await target.send(payload);
         await store.set(newThread.id, sent.id);
-        console.log(`Recreated crosspost for renamed thread ${newThread.id} (message ${sent.id}).`);
+        logger.info(`Recreated crosspost for renamed thread ${newThread.id} (message ${sent.id}).`);
       }
     } catch (error) {
-      console.error(`Failed to update crosspost header for thread ${newThread.id}:`, error);
+      logger.error(`Failed to update crosspost header for thread ${newThread.id}:`, error);
     }
   });
 
@@ -78,14 +79,14 @@ const registerHandlers = ({ client, config, ensureTargetChannel, store, buildCro
       const crosspostMessage = await store.fetchMessage(thread, target);
       if (crosspostMessage) {
         await crosspostMessage.edit(editPayload);
-        console.log(`Updated crosspost for thread ${thread.id} (message ${crosspostMessage.id}).`);
+        logger.info(`Updated crosspost for thread ${thread.id} (message ${crosspostMessage.id}).`);
       } else {
         const sent = await target.send(editPayload);
         await store.set(thread.id, sent.id);
-        console.log(`Recreated crosspost for thread ${thread.id} (message ${sent.id}).`);
+        logger.info(`Recreated crosspost for thread ${thread.id} (message ${sent.id}).`);
       }
     } catch (error) {
-      console.error(`Failed to update crosspost for thread ${thread.id}:`, error);
+      logger.error(`Failed to update crosspost for thread ${thread.id}:`, error);
     }
   });
 
@@ -109,9 +110,9 @@ const registerHandlers = ({ client, config, ensureTargetChannel, store, buildCro
       }
       await crosspostMessage.delete();
       await store.remove(thread.id);
-      console.log(`Deleted crosspost for thread ${thread.id} (message ${crosspostMessage.id}).`);
+      logger.info(`Deleted crosspost for thread ${thread.id} (message ${crosspostMessage.id}).`);
     } catch (error) {
-      console.error(`Failed to delete crosspost for thread ${thread.id}:`, error);
+      logger.error(`Failed to delete crosspost for thread ${thread.id}:`, error);
     }
   });
 
@@ -129,9 +130,9 @@ const registerHandlers = ({ client, config, ensureTargetChannel, store, buildCro
       }
       await crosspostMessage.delete();
       await store.remove(thread.id);
-      console.log(`Deleted crosspost for removed thread ${thread.id} (message ${crosspostMessage.id}).`);
+      logger.info(`Deleted crosspost for removed thread ${thread.id} (message ${crosspostMessage.id}).`);
     } catch (error) {
-      console.error(`Failed to delete crosspost for removed thread ${thread.id}:`, error);
+      logger.error(`Failed to delete crosspost for removed thread ${thread.id}:`, error);
     }
   });
 };

@@ -7,7 +7,8 @@
   "typings": "",
   "scripts": {
     "start": "npx infisical run -- node ./index.js",
-    "dev": "npx infisical run -- cross-env NODE_ENV=development nodemon ./index.js"
+    "dev": "npx infisical run -- cross-env NODE_ENV=development nodemon ./index.js",
+    "clear:commands": "npx infisical run -- node ./src/clearCommands.js"
   },
   "author": "",
   "license": "ISC",

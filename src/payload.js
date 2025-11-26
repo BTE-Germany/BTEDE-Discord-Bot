@@ -1,4 +1,5 @@
 const {MessageFlags} = require("discord.js");
+const logger = require("./logger");
 
 const downloadAttachment = async (attachment) => {
     try {
@@ -10,7 +11,7 @@ const downloadAttachment = async (attachment) => {
             name: attachment.name || "attachment",
         };
     } catch (error) {
-        console.error(`Failed to download attachment ${attachment.url}:`, error);
+        logger.error(`Failed to download attachment ${attachment.url}:`, error);
         return null;
     }
 };
@@ -36,13 +37,13 @@ const getStarterMessage = async (thread) => {
         return await thread.fetchStarterMessage();
     } catch (error) {
         if (error?.code !== 10008) {
-            console.error(`Failed to fetch starter message for thread ${thread.id}:`, error);
+            logger.error(`Failed to fetch starter message for thread ${thread.id}:`, error);
         }
         try {
             const fetched = await thread.messages.fetch({limit: 1});
             return fetched.first() || null;
         } catch (fetchError) {
-            console.error(`Fallback fetch failed for thread ${thread.id}:`, fetchError);
+            logger.error(`Fallback fetch failed for thread ${thread.id}:`, fetchError);
             return null;
         }
     }
