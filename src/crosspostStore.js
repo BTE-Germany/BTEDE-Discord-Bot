@@ -4,7 +4,7 @@ class CrosspostStore {
   constructor(model, targetChannelId) {
     this.model = model;
     this.targetChannelId = targetChannelId;
-    this.map = new Map(); // sourceMessageId -> { embedMessageId, contentMessageId, threadId }
+    this.map = new Map(); // sourceMessageId -> { embedMessageId, contentMessageId, threadId, updatedAt }
     this.lastContentCache = new Map(); // threadId -> contentMessageId
   }
 
@@ -19,6 +19,7 @@ class CrosspostStore {
           embedMessageId: record.embedMessageId || null,
           contentMessageId: record.contentMessageId || null,
           threadId: record.threadId || null,
+          updatedAt: record.updatedAt ? new Date(record.updatedAt).getTime() : Date.now(),
         });
       });
       if (records.length) {
@@ -39,6 +40,7 @@ class CrosspostStore {
       embedMessageId: ids.embedMessageId ?? current.embedMessageId ?? null,
       contentMessageId: ids.contentMessageId ?? current.contentMessageId ?? null,
       threadId: ids.threadId ?? current.threadId ?? null,
+      updatedAt: Date.now(),
     };
 
     this.map.set(sourceId, merged);
@@ -53,17 +55,22 @@ class CrosspostStore {
         },
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
+      this.updateLastContent(merged.threadId, merged.contentMessageId);
     } catch (error) {
       logger.error(`Failed to persist crosspost mapping for source ${sourceId}:`, error);
     }
   }
 
   async remove(sourceId) {
+    const record = this.map.get(sourceId);
     this.map.delete(sourceId);
     try {
       await this.model.deleteOne({ sourceMessageId: sourceId });
     } catch (error) {
       logger.error(`Failed to remove crosspost mapping for source ${sourceId}:`, error);
+    }
+    if (record?.contentMessageId) {
+      this.clearLastContent(record.threadId, record.contentMessageId);
     }
   }
 
@@ -78,6 +85,7 @@ class CrosspostStore {
     } catch (error) {
       logger.error(`Failed to remove crosspost mappings for thread ${threadId}:`, error);
     }
+    this.lastContentCache.delete(threadId);
   }
 
   getByThread(threadId) {
@@ -134,23 +142,29 @@ class CrosspostStore {
       const msg = await targetChannel.messages.fetch(cachedId).catch(() => null);
       if (msg) return msg;
       this.lastContentCache.delete(threadId);
-    }
-
-    const records = this.getByThread(threadId);
-    let latest = null;
-    for (const record of records) {
-      if (!record.contentMessageId) continue;
-      const msg = await targetChannel.messages.fetch(record.contentMessageId).catch(() => null);
-      if (!msg) continue;
-      if (!latest || msg.createdTimestamp > latest.createdTimestamp) {
-        latest = msg;
+      // also drop dead mapping from store
+      const records = this.getByThread(threadId).filter((r) => r.contentMessageId === cachedId);
+      for (const record of records) {
+        await this._clearContentId(record.sourceMessageId, record.contentMessageId);
       }
     }
 
-    if (latest) {
-      this.lastContentCache.set(threadId, latest.id);
+    const records = this.getByThread(threadId)
+      .filter((r) => r.contentMessageId)
+      .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+
+    for (const record of records) {
+      if (!record.contentMessageId) continue;
+      const msg = await targetChannel.messages.fetch(record.contentMessageId).catch(() => null);
+      if (msg) {
+        this.lastContentCache.set(threadId, msg.id);
+        return msg;
+      }
+      await this._clearContentId(record.sourceMessageId, record.contentMessageId);
+      // stop after first attempt to limit API calls
+      break;
     }
-    return latest;
+    return null;
   }
 
   updateLastContent(threadId, contentMessageId) {
@@ -164,6 +178,18 @@ class CrosspostStore {
     }
   }
 
+  async _clearContentId(sourceId, contentMessageId) {
+    const record = this.map.get(sourceId);
+    if (!record || record.contentMessageId !== contentMessageId) return;
+    record.contentMessageId = null;
+    this.map.set(sourceId, record);
+    try {
+      await this.model.updateOne({ sourceMessageId: sourceId }, { $set: { contentMessageId: null } });
+    } catch (error) {
+      logger.error(`Failed to clear dead contentMessageId for ${sourceId}:`, error);
+    }
+  }
+
   async prune(pruneDays) {
     if (pruneDays === 0) return; // disabled
 
@@ -171,6 +197,7 @@ class CrosspostStore {
       try {
         await this.model.deleteMany({});
         this.map.clear();
+        this.lastContentCache.clear();
         logger.info(`Pruned all crosspost records (pruneDays < 0, sourceMessageId).`);
       } catch (error) {
         logger.error("Failed to prune all crosspost records:", error);

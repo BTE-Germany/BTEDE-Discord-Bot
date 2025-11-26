@@ -75,12 +75,12 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
         const embed = buildHeaderEmbed(thread, isReply, color);
         await pair.embed.edit({embeds: [embed]});
 
-    const contentPayload = await buildContentPayload(sourceMessage);
-    if (!contentPayload) {
-      throw new Error(`No content payload available for ${isReply ? "reply" : "thread"} ${sourceId}.`);
-    }
-    await pair.content.edit(contentPayload);
-    store.updateLastContent(thread.id, pair.content.id);
+        const contentPayload = await buildContentPayload(sourceMessage);
+        if (!contentPayload) {
+            throw new Error(`No content payload available for ${isReply ? "reply" : "thread"} ${sourceId}.`);
+        }
+        await pair.content.edit(contentPayload);
+        store.updateLastContent(thread.id, pair.content.id);
 
         return pair;
     };

@@ -14,6 +14,8 @@ const start = async () => {
   const store = new CrosspostStore(Crosspost, config.targetChannelId);
   await store.load();
   await store.prune(config.pruneDays);
+  // If pruning removed all records for some threads, clear their colors
+  // (colors are also removed on thread delete in handlers)
 
   const colorStore = new ThreadColorStore(ThreadColor);
   // no pruning needed for colors; they are deleted on thread removal or when crossposts are gone
