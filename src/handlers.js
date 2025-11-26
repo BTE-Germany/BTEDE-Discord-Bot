@@ -1,5 +1,6 @@
 const { Events } = require("discord.js");
 const logger = require("./logger");
+const { buildHeaderEmbed, buildContentPayload, getStarterMessage } = require("./messageBuilder");
 
 const isTargetThread = (thread, config) => {
   if (!thread?.isThread?.()) return false;
@@ -8,7 +9,61 @@ const isTargetThread = (thread, config) => {
   return true;
 };
 
-const registerHandlers = ({ client, config, ensureTargetChannel, store, buildCrosspostPayload, getStarterMessage }) => {
+const registerHandlers = ({ client, config, ensureTargetChannel, store }) => {
+  const sendBoth = async (thread, sourceMessage, target) => {
+    const embed = buildHeaderEmbed(thread);
+    const embedMessage = await target.send({ embeds: [embed] });
+
+    const contentPayload = await buildContentPayload(sourceMessage);
+    if (!contentPayload) {
+      throw new Error(`No content payload available for thread ${thread.id}.`);
+    }
+    const contentMessage = await target.send(contentPayload);
+
+    await store.set(thread.id, {
+      embedMessageId: embedMessage.id,
+      contentMessageId: contentMessage.id,
+    });
+
+    logger.info(
+      `Crossposted thread ${thread.id} to ${target.id} (embed ${embedMessage.id}, content ${contentMessage.id}).`
+    );
+
+    return { embedMessage, contentMessage };
+  };
+
+  const ensureEmbed = async (thread, target, pair) => {
+    const resolved = pair || (await store.fetchPair(thread, target));
+    const embed = buildHeaderEmbed(thread);
+
+    if (resolved.embed) {
+      await resolved.embed.edit({ embeds: [embed] });
+      return resolved.embed;
+    }
+
+    const sent = await target.send({ embeds: [embed] });
+    await store.set(thread.id, { embedMessageId: sent.id });
+    return sent;
+  };
+
+  const ensureContent = async (thread, sourceMessage, target, pair) => {
+    const resolved = pair || (await store.fetchPair(thread, target));
+    const payload = await buildContentPayload(sourceMessage);
+
+    if (!payload) {
+      throw new Error(`No content payload available for thread ${thread.id}.`);
+    }
+
+    if (resolved.content) {
+      await resolved.content.edit(payload);
+      return resolved.content;
+    }
+
+    const sent = await target.send(payload);
+    await store.set(thread.id, { contentMessageId: sent.id });
+    return sent;
+  };
+
   client.on(Events.ThreadCreate, async (thread) => {
     if (!isTargetThread(thread, config)) return;
     if (thread.ownerId === client.user.id) return;
@@ -17,12 +72,9 @@ const registerHandlers = ({ client, config, ensureTargetChannel, store, buildCro
     if (!channel) return;
 
     const starterMessage = await getStarterMessage(thread);
-    const payload = await buildCrosspostPayload(thread, thread.ownerId, starterMessage);
 
     try {
-      const sent = await channel.send(payload);
-      await store.set(thread.id, sent.id);
-      logger.info(`Crossposted forum thread ${thread.id} to ${channel.id}`);
+      await sendBoth(thread, starterMessage, channel);
     } catch (error) {
       logger.error(`Failed to crosspost thread ${thread.id}:`, error);
     }
@@ -36,18 +88,21 @@ const registerHandlers = ({ client, config, ensureTargetChannel, store, buildCro
     if (!target) return;
 
     try {
-      const sourceMessage = await getStarterMessage(newThread);
-      const payload = await buildCrosspostPayload(newThread, newThread.ownerId, sourceMessage);
-      const crosspostMessage = await store.fetchMessage(newThread, target);
+      const pair = await store.fetchPair(newThread, target);
 
-      if (crosspostMessage) {
-        await crosspostMessage.edit(payload);
-        logger.info(`Updated crosspost header for thread ${newThread.id} (message ${crosspostMessage.id}).`);
-      } else {
-        const sent = await target.send(payload);
-        await store.set(newThread.id, sent.id);
-        logger.info(`Recreated crosspost for renamed thread ${newThread.id} (message ${sent.id}).`);
+      const starterMessage = await getStarterMessage(newThread);
+      if (!pair.embed || !pair.content) {
+        if (pair.embed) await pair.embed.delete().catch((err) => logger.warn(`Failed to delete stale embed ${pair.embed.id}:`, err));
+        if (pair.content) await pair.content.delete().catch((err) => logger.warn(`Failed to delete stale content ${pair.content.id}:`, err));
+        await sendBoth(newThread, starterMessage, target);
+        logger.info(`Recreated full crosspost for thread ${newThread.id} after partial/missing messages.`);
+        return;
       }
+
+      await ensureEmbed(newThread, target, pair);
+      await ensureContent(newThread, starterMessage, target, pair);
+
+      logger.info(`Updated crosspost header for thread ${newThread.id}.`);
     } catch (error) {
       logger.error(`Failed to update crosspost header for thread ${newThread.id}:`, error);
     }
@@ -65,30 +120,32 @@ const registerHandlers = ({ client, config, ensureTargetChannel, store, buildCro
     const target = await ensureTargetChannel();
     if (!target) return;
 
-    const authorId = message.author?.id || thread.ownerId;
-    const payload = await buildCrosspostPayload(thread, authorId, message);
-    const editPayload = payload.files.length
-      ? payload
-      : {
-          ...payload,
-          files: [],
-          attachments: [],
-        };
-
     try {
-      const crosspostMessage = await store.fetchMessage(thread, target);
-      if (crosspostMessage) {
-        await crosspostMessage.edit(editPayload);
-        logger.info(`Updated crosspost for thread ${thread.id} (message ${crosspostMessage.id}).`);
-      } else {
-        const sent = await target.send(editPayload);
-        await store.set(thread.id, sent.id);
-        logger.info(`Recreated crosspost for thread ${thread.id} (message ${sent.id}).`);
+      const pair = await store.fetchPair(thread, target);
+
+      if (!pair.embed || !pair.content) {
+        if (pair.embed) await pair.embed.delete().catch((err) => logger.warn(`Failed to delete stale embed ${pair.embed.id}:`, err));
+        if (pair.content) await pair.content.delete().catch((err) => logger.warn(`Failed to delete stale content ${pair.content.id}:`, err));
+        await sendBoth(thread, message, target);
+        logger.info(`Recreated full crosspost for thread ${thread.id} after partial/missing messages.`);
+        return;
       }
+
+      await ensureEmbed(thread, target, pair);
+      await ensureContent(thread, message, target, pair);
+      logger.info(`Updated crosspost for thread ${thread.id}.`);
     } catch (error) {
       logger.error(`Failed to update crosspost for thread ${thread.id}:`, error);
     }
   });
+
+  const deleteCrosspost = async (thread, target, reason) => {
+    const pair = await store.fetchPair(thread, target);
+    if (pair.embed) await pair.embed.delete().catch((err) => logger.warn(`Failed to delete embed ${pair.embed.id}:`, err));
+    if (pair.content) await pair.content.delete().catch((err) => logger.warn(`Failed to delete content ${pair.content.id}:`, err));
+    await store.remove(thread.id);
+    logger.info(`Deleted crosspost for thread ${thread.id}${reason ? ` (${reason})` : ""}.`);
+  };
 
   client.on(Events.MessageDelete, async (deleted) => {
     const message = deleted.partial ? await deleted.fetch().catch(() => null) : deleted;
@@ -103,14 +160,7 @@ const registerHandlers = ({ client, config, ensureTargetChannel, store, buildCro
     if (!target) return;
 
     try {
-      const crosspostMessage = await store.fetchMessage(thread, target);
-      if (!crosspostMessage) {
-        await store.remove(thread.id);
-        return;
-      }
-      await crosspostMessage.delete();
-      await store.remove(thread.id);
-      logger.info(`Deleted crosspost for thread ${thread.id} (message ${crosspostMessage.id}).`);
+      await deleteCrosspost(thread, target, "starter deleted");
     } catch (error) {
       logger.error(`Failed to delete crosspost for thread ${thread.id}:`, error);
     }
@@ -123,14 +173,7 @@ const registerHandlers = ({ client, config, ensureTargetChannel, store, buildCro
     if (!target) return;
 
     try {
-      const crosspostMessage = await store.fetchMessage(thread, target);
-      if (!crosspostMessage) {
-        await store.remove(thread.id);
-        return;
-      }
-      await crosspostMessage.delete();
-      await store.remove(thread.id);
-      logger.info(`Deleted crosspost for removed thread ${thread.id} (message ${crosspostMessage.id}).`);
+      await deleteCrosspost(thread, target, "thread deleted");
     } catch (error) {
       logger.error(`Failed to delete crosspost for removed thread ${thread.id}:`, error);
     }

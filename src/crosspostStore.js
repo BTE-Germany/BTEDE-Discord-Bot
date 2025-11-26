@@ -4,13 +4,19 @@ class CrosspostStore {
   constructor(model, targetChannelId) {
     this.model = model;
     this.targetChannelId = targetChannelId;
-    this.map = new Map(); // threadId -> messageId
+    this.map = new Map(); // threadId -> { embedMessageId, contentMessageId }
   }
 
   async load() {
     try {
+      this.map.clear();
       const records = await this.model.find({ channelId: this.targetChannelId }).lean();
-      records.forEach((record) => this.map.set(record.threadId, record.messageId));
+      records.forEach((record) =>
+        this.map.set(record.threadId, {
+          embedMessageId: record.embedMessageId || null,
+          contentMessageId: record.contentMessageId || null,
+        })
+      );
       if (records.length) {
         logger.info(`Loaded ${records.length} crosspost references from database.`);
       }
@@ -23,12 +29,23 @@ class CrosspostStore {
     return this.map.get(threadId);
   }
 
-  async set(threadId, messageId) {
-    this.map.set(threadId, messageId);
+  async set(threadId, ids) {
+    const current = this.map.get(threadId) || {};
+    const merged = {
+      embedMessageId: ids.embedMessageId ?? current.embedMessageId ?? null,
+      contentMessageId: ids.contentMessageId ?? current.contentMessageId ?? null,
+    };
+
+    this.map.set(threadId, merged);
     try {
       await this.model.findOneAndUpdate(
         { threadId },
-        { threadId, messageId, channelId: this.targetChannelId },
+        {
+          threadId,
+          embedMessageId: merged.embedMessageId,
+          contentMessageId: merged.contentMessageId,
+          channelId: this.targetChannelId,
+        },
         { upsert: true, new: true, setDefaultsOnInsert: true }
       );
     } catch (error) {
@@ -45,20 +62,45 @@ class CrosspostStore {
     }
   }
 
-  async fetchMessage(thread, targetChannel) {
-    const crosspostId = this.get(thread.id);
-    if (!crosspostId) return null;
+  async fetchPair(thread, targetChannel) {
+    const record = this.get(thread.id);
+    if (!record) return { embed: null, content: null };
 
-    try {
-      return await targetChannel.messages.fetch(crosspostId);
-    } catch (error) {
-      if (error?.code === 10008 || error?.status === 404) {
-        logger.warn(`Crosspost message missing for thread ${thread.id}; cleaning up mapping.`);
-        await this.remove(thread.id);
-        return null;
+    const result = { embed: null, content: null };
+    const fetchOne = async (messageId) => {
+      try {
+        return await targetChannel.messages.fetch(messageId);
+      } catch (error) {
+        if (error?.code === 10008 || error?.status === 404) {
+          return null;
+        }
+        throw error;
       }
-      throw error;
+    };
+
+    if (record.embedMessageId) {
+      const embedMessage = await fetchOne(record.embedMessageId);
+      if (embedMessage) {
+        result.embed = embedMessage;
+      } else {
+        logger.warn(`Embed message missing for thread ${thread.id}; will recreate on next action.`);
+      }
     }
+
+    if (record.contentMessageId) {
+      const contentMessage = await fetchOne(record.contentMessageId);
+      if (contentMessage) {
+        result.content = contentMessage;
+      } else {
+        logger.warn(`Content message missing for thread ${thread.id}; will recreate on next action.`);
+      }
+    }
+
+    if (!record.embedMessageId && !record.contentMessageId) {
+      await this.remove(thread.id);
+    }
+
+    return result;
   }
 
   async prune(pruneDays) {
@@ -82,18 +124,8 @@ class CrosspostStore {
         updatedAt: { $lt: cutoff },
       });
       if (result.deletedCount) {
-        let removed = 0;
-        for (const [threadId] of this.map) {
-          // Without timestamps in the map, conservatively drop if missing in DB.
-          // We'll reload from DB after pruning to stay consistent.
-          removed += 1;
-        }
-        this.map.clear();
-        const remainingRecords = await this.model.find({ channelId: this.targetChannelId }).lean();
-        remainingRecords.forEach((record) => this.map.set(record.threadId, record.messageId));
-        logger.info(
-          `Pruned ${result.deletedCount} crosspost records older than ${pruneDays} days. Reloaded ${remainingRecords.length} active records.`
-        );
+        await this.load();
+        logger.info(`Pruned ${result.deletedCount} crosspost records older than ${pruneDays} days.`);
       }
     } catch (error) {
       logger.error("Failed to prune stale crosspost records:", error);

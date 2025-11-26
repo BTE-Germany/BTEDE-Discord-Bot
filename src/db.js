@@ -4,7 +4,8 @@ const logger = require("./logger");
 const crosspostSchema = new mongoose.Schema(
   {
     threadId: { type: String, required: true, unique: true },
-    messageId: { type: String, required: true },
+    embedMessageId: { type: String },
+    contentMessageId: { type: String },
     channelId: { type: String, required: true },
   },
   { timestamps: true }

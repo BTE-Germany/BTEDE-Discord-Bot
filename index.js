@@ -3,7 +3,6 @@ const { connectDatabase, Crosspost } = require("./src/db");
 const { CrosspostStore } = require("./src/crosspostStore");
 const { createDiscordClient } = require("./src/client");
 const { registerHandlers } = require("./src/handlers");
-const { buildCrosspostPayload, getStarterMessage } = require("./src/payload");
 const logger = require("./src/logger");
 
 const start = async () => {
@@ -32,8 +31,6 @@ const start = async () => {
     config,
     ensureTargetChannel,
     store,
-    buildCrosspostPayload,
-    getStarterMessage,
   });
 
   await client.login(config.token);
