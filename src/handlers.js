@@ -223,11 +223,13 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
                     if (reply.embedMessageId) {
                         await target.messages
                             .delete(reply.embedMessageId)
+                            .then(() => logger.info(`Deleted reply embed ${reply.embedMessageId} for thread ${thread.id}.`))
                             .catch((err) => logger.warn(`Failed to delete reply embed ${reply.embedMessageId}:`, err));
                     }
                     if (reply.contentMessageId) {
                         await target.messages
                             .delete(reply.contentMessageId)
+                            .then(() => logger.info(`Deleted reply content ${reply.contentMessageId} for thread ${thread.id}.`))
                             .catch((err) => logger.warn(`Failed to delete reply content ${reply.contentMessageId}:`, err));
                     }
                     await store.remove(reply.sourceMessageId);
