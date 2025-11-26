@@ -30,3 +30,4 @@ Umgebungsvariablen (aus Infisical):
 - Löscht den Crosspost, wenn das Original gelöscht wird
 - Speichert eine Crosspost-Map in der Datenbank
 - Zusätzliche Action Queue verhindert desynchronisation
+- Jeder Thread erhält eine zufällige Farbe, die alle dazugehörigen Nachrichten bekommen
