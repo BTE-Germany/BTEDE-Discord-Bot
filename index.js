@@ -1,36 +1,50 @@
-(async function () {
-  const { Intents } = require("discord.js");
-  const Bot = require("./src/classes/Bot");
+const { loadConfig } = require("./src/config");
+const { connectDatabase, Crosspost, ThreadColor } = require("./src/db");
+const { CrosspostStore } = require("./src/crosspostStore");
+const { createDiscordClient } = require("./src/client");
+const { registerHandlers } = require("./src/handlers");
+const { ThreadColorStore } = require("./src/threadColorStore");
+const logger = require("./src/logger");
 
-  const client = new Bot({
-    partials: ["MESSAGE", "CHANNEL"],
-    fetchAllMembers: false,
-    intents: [
-      Intents.FLAGS.GUILDS,
-      Intents.FLAGS.GUILD_MESSAGES,
-      Intents.FLAGS.GUILD_MEMBERS,
-      Intents.FLAGS.GUILD_VOICE_STATES,
-      Intents.FLAGS.DIRECT_MESSAGES,
-    ],
+const start = async () => {
+  const config = loadConfig();
+
+  await connectDatabase(config.mongoUri);
+
+  const store = new CrosspostStore(Crosspost, config.targetChannelId);
+  await store.load();
+  await store.prune(config.pruneDays);
+  // If pruning removed all records for some threads, clear their colors
+  // (colors are also removed on thread delete in handlers)
+
+  const colorStore = new ThreadColorStore(ThreadColor);
+  // no pruning needed for colors; they are deleted on thread removal or when crossposts are gone
+
+  if (config.pruneDays !== 0) {
+    const intervalMs = 12 * 60 * 60 * 1000;
+    setInterval(async () => {
+      try {
+        await store.prune(config.pruneDays);
+      } catch (error) {
+        logger.error("Scheduled prune failed:", error);
+      }
+    }, intervalMs);
+  }
+
+  const { client, ensureTargetChannel } = createDiscordClient(config.targetChannelId);
+
+  registerHandlers({
+    client,
+    config,
+    ensureTargetChannel,
+    store,
+    colorStore,
   });
 
-  const mongoose = require("mongoose");
-  client.connection = await mongoose.connect(client.config.mongo.string, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  await client.login(config.token);
+};
 
-  const {
-    registerEvents,
-    registerCommands,
-    registerInfoCommands,
-  } = require("./src/functions/register");
-  await registerEvents(client, "../events");
-  await registerCommands(client, "../commands");
-  await registerInfoCommands(client);
-  client.Logger.info(`Registered ${client.commands.size} commands`, "COMMANDS");
-
-  await client.login(client.config.BOT_TOKEN);
-
-  require("./src/messageUpdateAPI.js")(client);
-})();
+start().catch((error) => {
+  logger.error("Failed to start bot:", error);
+  process.exit(1);
+});
