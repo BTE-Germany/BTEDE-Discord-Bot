@@ -2,7 +2,7 @@ name: Build Discord Bot Docker image
 
 on:
   push:
-    branches: [ "prod", "dev" ]
+    branches: [ "main", "dev" ]
     paths:
       - ./**
   workflow_dispatch:
