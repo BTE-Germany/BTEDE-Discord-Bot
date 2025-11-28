@@ -2,7 +2,6 @@ node_modules/
 .env
 .env.*
 !.env.example
-.infisical.json
 
 .idea/*
 *.patch
@@ -87,4 +86,3 @@ Sessionx.vim
 *~
 tags
 [._]*.un~
-/package-lock.json
