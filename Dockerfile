@@ -8,5 +8,6 @@ RUN npm ci --omit=dev
 
 # Copy source
 COPY . .
+RUN chmod +x ./scripts/entrypoint.sh
 
 CMD ["./scripts/entrypoint.sh"]
