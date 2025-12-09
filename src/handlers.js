@@ -1,6 +1,6 @@
-const { Events } = require("discord.js");
+const {Events} = require("discord.js");
 const logger = require("./logger");
-const { buildHeaderEmbed, buildContentPayload, getStarterMessage } = require("./messageBuilder");
+const {buildHeaderEmbed, buildContentPayload, getStarterMessage} = require("./messageBuilder");
 
 const isTargetThread = (thread, config) => {
     if (!thread?.isThread?.()) return false;
@@ -14,7 +14,8 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
 
     const runInThreadQueue = (threadId, task) => {
         const prev = threadQueues.get(threadId) || Promise.resolve();
-        const next = prev.catch(() => {}).then(task);
+        const next = prev.catch(() => {
+        }).then(task);
         threadQueues.set(threadId, next.finally(() => {
             if (threadQueues.get(threadId) === next) {
                 threadQueues.delete(threadId);
@@ -23,44 +24,44 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
         return next;
     };
     const sendCrosspost = async ({sourceId, thread, sourceMessage, target, isReply}) => {
-    const color = await colorStore.ensure(thread.id);
-    const embed = buildHeaderEmbed(thread, isReply, color);
-    const embedMessage = await target.send({ embeds: [embed] });
+        const color = await colorStore.ensure(thread.id);
+        const embed = buildHeaderEmbed(thread, isReply, color, sourceMessage?.author?.id);
+        const embedMessage = await target.send({embeds: [embed]});
 
-    const contentPayload = await buildContentPayload(sourceMessage);
-    if (!contentPayload) {
-      throw new Error(`No content payload available for ${isReply ? "reply" : "thread"} ${sourceId}.`);
-    }
-    // For replies: prefer replying to the crossposted target of the original reply, else fall back to the latest content in this thread, else send to channel.
-    let contentMessage = null;
-    if (isReply && sourceMessage?.reference?.messageId) {
-      const refPair = await store.fetchPair(sourceMessage.reference.messageId, target);
-      if (refPair?.content) {
-        contentMessage = await refPair.content.reply(contentPayload);
-      }
-    }
-    if (!contentMessage) {
-      const lastContent = await store.getLastContentMessage(thread.id, target);
-      if (isReply && lastContent) {
-        contentMessage = await lastContent.reply(contentPayload);
-      } else {
-        contentMessage = await target.send(contentPayload);
-      }
-    }
+        const contentPayload = await buildContentPayload(sourceMessage);
+        if (!contentPayload) {
+            throw new Error(`No content payload available for ${isReply ? "reply" : "thread"} ${sourceId}.`);
+        }
+        // For replies: prefer replying to the crossposted target of the original reply, else fall back to the latest content in this thread, else send to channel.
+        let contentMessage = null;
+        if (isReply && sourceMessage?.reference?.messageId) {
+            const refPair = await store.fetchPair(sourceMessage.reference.messageId, target);
+            if (refPair?.content) {
+                contentMessage = await refPair.content.reply(contentPayload);
+            }
+        }
+        if (!contentMessage) {
+            const lastContent = await store.getLastContentMessage(thread.id, target);
+            if (isReply && lastContent) {
+                contentMessage = await lastContent.reply(contentPayload);
+            } else {
+                contentMessage = await target.send(contentPayload);
+            }
+        }
 
-    await store.set(sourceId, {
-      embedMessageId: embedMessage.id,
-      contentMessageId: contentMessage.id,
-      threadId: thread.id,
-      sourceMessageId: isReply ? sourceId : thread.id,
-    });
-    store.updateLastContent(thread.id, contentMessage.id);
+        await store.set(sourceId, {
+            embedMessageId: embedMessage.id,
+            contentMessageId: contentMessage.id,
+            threadId: thread.id,
+            sourceMessageId: isReply ? sourceId : thread.id,
+        });
+        store.updateLastContent(thread.id, contentMessage.id);
 
-    const label = isReply ? `reply ${sourceId}` : `thread ${thread.id}`;
-    logger.info(`Crossposted ${label} to ${target.id} (embed ${embedMessage.id}, content ${contentMessage.id}).`);
+        const label = isReply ? `reply ${sourceId}` : `thread ${thread.id}`;
+        logger.info(`Crossposted ${label} to ${target.id} (embed ${embedMessage.id}, content ${contentMessage.id}).`);
 
-    return {embedMessage, contentMessage};
-  };
+        return {embedMessage, contentMessage};
+    };
 
     const ensureCrosspost = async ({sourceId, thread, sourceMessage, target, isReply}) => {
         const pair = await store.fetchPair(sourceId, target);
@@ -72,7 +73,7 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
         }
 
         const color = await colorStore.ensure(thread.id);
-        const embed = buildHeaderEmbed(thread, isReply, color);
+        const embed = buildHeaderEmbed(thread, isReply, color, sourceMessage?.author?.id);
         await pair.embed.edit({embeds: [embed]});
 
         const contentPayload = await buildContentPayload(sourceMessage);
@@ -178,10 +179,22 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
 
             try {
                 if (message.id === thread.id) {
-                    await ensureCrosspost({sourceId: thread.id, thread, sourceMessage: message, target, isReply: false});
+                    await ensureCrosspost({
+                        sourceId: thread.id,
+                        thread,
+                        sourceMessage: message,
+                        target,
+                        isReply: false
+                    });
                     logger.info(`Updated crosspost for thread ${thread.id}.`);
                 } else {
-                    await ensureCrosspost({sourceId: message.id, thread, sourceMessage: message, target, isReply: true});
+                    await ensureCrosspost({
+                        sourceId: message.id,
+                        thread,
+                        sourceMessage: message,
+                        target,
+                        isReply: true
+                    });
                     logger.info(`Updated crossposted reply ${message.id} for thread ${thread.id}.`);
                 }
             } catch (error) {
