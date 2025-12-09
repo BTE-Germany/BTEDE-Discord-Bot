@@ -2,6 +2,8 @@ node_modules/
 .env
 .env.*
 !.env.example
+# Infisical configuration file - injected via env variables
+.infisical.json
 
 .idea/*
 *.patch
