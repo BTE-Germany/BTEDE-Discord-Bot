@@ -33,8 +33,9 @@ const downloadAttachment = async (attachment) => {
     }
 };
 
-const buildHeaderEmbed = (thread, isReply = true, color) => {
-    const authorLabel = thread.ownerId ? `<@${thread.ownerId}>` : "Jemand";
+const buildHeaderEmbed = (thread, isReply = true, color, authorId) => {
+    const resolvedAuthorId = authorId || thread.ownerId;
+    const authorLabel = resolvedAuthorId ? `<@${resolvedAuthorId}>` : "Jemand";
     const threadUrl = `https://discord.com/channels/${thread.guildId}/${thread.id}`;
 
     const embed = new EmbedBuilder()

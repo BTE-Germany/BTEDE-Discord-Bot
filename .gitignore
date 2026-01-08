@@ -2,6 +2,7 @@ node_modules/
 .env
 .env.*
 !.env.example
+# Infisical configuration file - injected via env variables
 .infisical.json
 
 .idea/*
@@ -87,4 +88,3 @@ Sessionx.vim
 *~
 tags
 [._]*.un~
-/package-lock.json

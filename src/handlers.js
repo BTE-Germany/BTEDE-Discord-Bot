@@ -1,6 +1,23 @@
-const { Events } = require("discord.js");
+const {Events} = require("discord.js");
 const logger = require("./logger");
-const { buildHeaderEmbed, buildContentPayload, getStarterMessage } = require("./messageBuilder");
+const {buildHeaderEmbed, buildContentPayload, getStarterMessage} = require("./messageBuilder");
+
+const IMAGE_EXTENSION_REGEX = /\.(?:avif|bmp|gif|jpe?g|png|svg|webp)$/i;
+
+const isImageAttachment = (attachment) => {
+    if (!attachment) return false;
+    if (attachment.contentType?.startsWith("image/")) return true;
+    if (typeof attachment.width === "number" && typeof attachment.height === "number") return true;
+    return IMAGE_EXTENSION_REGEX.test(attachment.name || "");
+
+};
+
+const messageContainsImage = (message) => {
+    if (!message) return false;
+    const attachments = Array.from(message.attachments?.values?.() || []);
+    if (attachments.some(isImageAttachment)) return true;
+    return message.embeds?.some((embed) => Boolean(embed?.image?.url) || embed?.type === "image");
+};
 
 const isTargetThread = (thread, config) => {
     if (!thread?.isThread?.()) return false;
@@ -14,7 +31,8 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
 
     const runInThreadQueue = (threadId, task) => {
         const prev = threadQueues.get(threadId) || Promise.resolve();
-        const next = prev.catch(() => {}).then(task);
+        const next = prev.catch(() => {
+        }).then(task);
         threadQueues.set(threadId, next.finally(() => {
             if (threadQueues.get(threadId) === next) {
                 threadQueues.delete(threadId);
@@ -23,56 +41,61 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
         return next;
     };
     const sendCrosspost = async ({sourceId, thread, sourceMessage, target, isReply}) => {
-    const color = await colorStore.ensure(thread.id);
-    const embed = buildHeaderEmbed(thread, isReply, color);
-    const embedMessage = await target.send({ embeds: [embed] });
+        const color = await colorStore.ensure(thread.id);
+        const embed = buildHeaderEmbed(thread, isReply, color, sourceMessage?.author?.id);
+        const embedMessage = await target.send({embeds: [embed]});
 
-    const contentPayload = await buildContentPayload(sourceMessage);
-    if (!contentPayload) {
-      throw new Error(`No content payload available for ${isReply ? "reply" : "thread"} ${sourceId}.`);
-    }
-    // For replies: prefer replying to the crossposted target of the original reply, else fall back to the latest content in this thread, else send to channel.
-    let contentMessage = null;
-    if (isReply && sourceMessage?.reference?.messageId) {
-      const refPair = await store.fetchPair(sourceMessage.reference.messageId, target);
-      if (refPair?.content) {
-        contentMessage = await refPair.content.reply(contentPayload);
-      }
-    }
-    if (!contentMessage) {
-      const lastContent = await store.getLastContentMessage(thread.id, target);
-      if (isReply && lastContent) {
-        contentMessage = await lastContent.reply(contentPayload);
-      } else {
-        contentMessage = await target.send(contentPayload);
-      }
-    }
+        const contentPayload = await buildContentPayload(sourceMessage);
+        if (!contentPayload) {
+            throw new Error(`No content payload available for ${isReply ? "reply" : "thread"} ${sourceId}.`);
+        }
+        // For replies: prefer replying to the crossposted target of the original reply, else fall back to the latest content in this thread, else send to channel.
+        let contentMessage = null;
+        if (isReply && sourceMessage?.reference?.messageId) {
+            const refPair = await store.fetchPair(sourceMessage.reference.messageId, target);
+            if (refPair?.content) {
+                contentMessage = await refPair.content.reply(contentPayload);
+            }
+        }
+        if (!contentMessage) {
+            const lastContent = await store.getLastContentMessage(thread.id, target);
+            if (isReply && lastContent) {
+                contentMessage = await lastContent.reply(contentPayload);
+            } else {
+                contentMessage = await target.send(contentPayload);
+            }
+        }
 
-    await store.set(sourceId, {
-      embedMessageId: embedMessage.id,
-      contentMessageId: contentMessage.id,
-      threadId: thread.id,
-      sourceMessageId: isReply ? sourceId : thread.id,
-    });
-    store.updateLastContent(thread.id, contentMessage.id);
+        await store.set(sourceId, {
+            embedMessageId: embedMessage.id,
+            contentMessageId: contentMessage.id,
+            threadId: thread.id,
+            sourceMessageId: isReply ? sourceId : thread.id,
+        });
+        store.updateLastContent(thread.id, contentMessage.id);
 
-    const label = isReply ? `reply ${sourceId}` : `thread ${thread.id}`;
-    logger.info(`Crossposted ${label} to ${target.id} (embed ${embedMessage.id}, content ${contentMessage.id}).`);
+        const label = isReply ? `reply ${sourceId}` : `thread ${thread.id}`;
+        logger.info(`Crossposted ${label} to ${target.id} (embed ${embedMessage.id}, content ${contentMessage.id}).`);
 
-    return {embedMessage, contentMessage};
-  };
+        return {embedMessage, contentMessage};
+    };
 
     const ensureCrosspost = async ({sourceId, thread, sourceMessage, target, isReply}) => {
         const pair = await store.fetchPair(sourceId, target);
+        const canCrosspost = messageContainsImage(sourceMessage);
 
         if (!pair.embed || !pair.content) {
+            if (!canCrosspost) {
+                return false;
+            }
             if (pair.embed) await pair.embed.delete().catch((err) => logger.warn(`Failed to delete stale embed ${pair.embed.id}:`, err));
             if (pair.content) await pair.content.delete().catch((err) => logger.warn(`Failed to delete stale content ${pair.content.id}:`, err));
-            return sendCrosspost({sourceId, thread, sourceMessage, target, isReply});
+            await sendCrosspost({sourceId, thread, sourceMessage, target, isReply});
+            return true;
         }
 
         const color = await colorStore.ensure(thread.id);
-        const embed = buildHeaderEmbed(thread, isReply, color);
+        const embed = buildHeaderEmbed(thread, isReply, color, sourceMessage?.author?.id);
         await pair.embed.edit({embeds: [embed]});
 
         const contentPayload = await buildContentPayload(sourceMessage);
@@ -82,7 +105,7 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
         await pair.content.edit(contentPayload);
         store.updateLastContent(thread.id, pair.content.id);
 
-        return pair;
+        return true;
     };
 
     const deleteCrosspost = async (sourceId, target, reason) => {
@@ -108,6 +131,7 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
             if (!channel) return;
 
             const starterMessage = await getStarterMessage(thread);
+            if (!starterMessage || !messageContainsImage(starterMessage)) return;
 
             try {
                 await sendCrosspost({
@@ -133,14 +157,16 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
 
             try {
                 const starterMessage = await getStarterMessage(newThread);
-                await ensureCrosspost({
+                const updated = await ensureCrosspost({
                     sourceId: newThread.id,
                     thread: newThread,
                     sourceMessage: starterMessage,
                     target,
                     isReply: false,
                 });
-                logger.info(`Updated crosspost header for thread ${newThread.id}.`);
+                if (updated) {
+                    logger.info(`Updated crosspost header for thread ${newThread.id}.`);
+                }
             } catch (error) {
                 logger.error(`Failed to update crosspost header for thread ${newThread.id}:`, error);
             }
@@ -156,6 +182,8 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
         runInThreadQueue(thread.id, async () => {
             const target = await ensureTargetChannel();
             if (!target) return;
+
+            if (!messageContainsImage(message)) return;
 
             try {
                 await sendCrosspost({sourceId: message.id, thread, sourceMessage: message, target, isReply: true});
@@ -178,11 +206,27 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
 
             try {
                 if (message.id === thread.id) {
-                    await ensureCrosspost({sourceId: thread.id, thread, sourceMessage: message, target, isReply: false});
-                    logger.info(`Updated crosspost for thread ${thread.id}.`);
+                    const updated = await ensureCrosspost({
+                        sourceId: thread.id,
+                        thread,
+                        sourceMessage: message,
+                        target,
+                        isReply: false
+                    });
+                    if (updated) {
+                        logger.info(`Updated crosspost for thread ${thread.id}.`);
+                    }
                 } else {
-                    await ensureCrosspost({sourceId: message.id, thread, sourceMessage: message, target, isReply: true});
-                    logger.info(`Updated crossposted reply ${message.id} for thread ${thread.id}.`);
+                    const updated = await ensureCrosspost({
+                        sourceId: message.id,
+                        thread,
+                        sourceMessage: message,
+                        target,
+                        isReply: true
+                    });
+                    if (updated) {
+                        logger.info(`Updated crossposted reply ${message.id} for thread ${thread.id}.`);
+                    }
                 }
             } catch (error) {
                 logger.error(`Failed to update crosspost for thread ${thread.id}:`, error);

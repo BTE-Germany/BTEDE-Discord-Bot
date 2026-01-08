@@ -1,8 +1,5 @@
 FROM node:20-alpine
 
-# Install Infisical CLI for secret injection
-RUN npm install -g @infisical/cli
-
 WORKDIR /app
 
 # Install production dependencies
@@ -11,5 +8,6 @@ RUN npm ci --omit=dev
 
 # Copy source
 COPY . .
+RUN chmod +x ./scripts/entrypoint.sh
 
 CMD ["./scripts/entrypoint.sh"]
