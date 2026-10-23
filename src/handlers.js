@@ -29,6 +29,17 @@ const isTargetThread = (thread, config) => {
 const registerHandlers = ({client, config, ensureTargetChannel, store, colorStore}) => {
     const threadQueues = new Map();
 
+    client.on(Events.GuildMemberAdd, async (member) => {
+        if (config.guildId && member.guild.id !== config.guildId) return;
+        if (member.user.bot) return;
+
+        try {
+            await member.setNickname(member.user.username, "Use global username on server join");
+        } catch (error) {
+            logger.error(`Failed to set nickname for member ${member.id} in guild ${member.guild.id}:`, error);
+        }
+    });
+
     const runInThreadQueue = (threadId, task) => {
         const prev = threadQueues.get(threadId) || Promise.resolve();
         const next = prev.catch(() => {
