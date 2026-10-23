@@ -88,6 +88,10 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
         const label = isReply ? `reply ${sourceId}` : `thread ${thread.id}`;
         logger.info(`Crossposted ${label} to ${target.id} (embed ${embedMessage.id}, content ${contentMessage.id}).`);
 
+        await contentMessage.react("🔥").catch((error) => {
+            logger.warn(`Failed to add fire reaction to crosspost ${contentMessage.id} in ${target.id}:`, error);
+        });
+
         return {embedMessage, contentMessage};
     };
 
