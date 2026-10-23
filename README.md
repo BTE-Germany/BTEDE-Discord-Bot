@@ -1,6 +1,7 @@
-# Forum crossposter
+# BTEDE-Discord-Bot
 
-Überwacht ein Forum und crosspostet in einen Channel.
+- Überwacht das Progress Forum und crosspostet in den Progress Channel.
+- Erstellt, löscht und renamed automatisch Voice Channels nach Bedarf
 
 ## Setup
 
@@ -31,6 +32,7 @@ Umgebungsvariablen (aus Infisical):
 - Speichert eine Crosspost-Map in der Datenbank
 - Zusätzliche Action Queue verhindert desynchronisation
 - Jeder Thread erhält eine zufällige Farbe, die alle dazugehörigen Nachrichten bekommen
+- Verwaltet Voicechannels ohne Datenbank: pro Gruppe bleibt immer ein leerer Reserve-Channel vorhanden, belegte Channels werden fortlaufend nummeriert und überzählige leere Channels gelöscht
 
 ## Docker
 
