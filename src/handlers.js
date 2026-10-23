@@ -32,9 +32,12 @@ const registerHandlers = ({client, config, ensureTargetChannel, store, colorStor
     client.on(Events.GuildMemberAdd, async (member) => {
         if (config.guildId && member.guild.id !== config.guildId) return;
         if (member.user.bot) return;
+        if (member.nickname) return;
 
+        const nickname = member.user.globalName || member.user.username;
         try {
-            await member.setNickname(member.user.username, "Use global username on server join");
+            await member.setNickname(nickname, "Save global display name as server nickname on join");
+            logger.info(`Set server nickname for member ${member.id} in guild ${member.guild.id} to ${nickname}.`);
         } catch (error) {
             logger.error(`Failed to set nickname for member ${member.id} in guild ${member.guild.id}:`, error);
         }
