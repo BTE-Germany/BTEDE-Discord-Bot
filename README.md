@@ -35,6 +35,7 @@ Umgebungsvariablen (aus Infisical):
 - Zusätzliche Action Queue verhindert desynchronisation
 - Jeder Thread erhält eine zufällige Farbe, die alle dazugehörigen Nachrichten bekommen
 - Verwaltet Voicechannels ohne Datenbank: pro Gruppe bleibt immer ein leerer Reserve-Channel vorhanden, belegte Channels werden fortlaufend nummeriert und überzählige leere Channels gelöscht
+- Gibt neuen Nutzern beim join automatisch den globalen Anzeigenamen als lokalen Namen
 
 ## Docker
 
