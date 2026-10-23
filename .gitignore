@@ -88,3 +88,5 @@ Sessionx.vim
 *~
 tags
 [._]*.un~
+/.ai/
+/.codex/
