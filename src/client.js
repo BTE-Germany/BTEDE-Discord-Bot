@@ -31,7 +31,7 @@ const createDiscordClient = (targetChannelId) => {
   };
 
   client.once(Events.ClientReady, async (readyClient) => {
-    logger.info(`Logged in as ${readyClient.user.tag}. Watching for new forum posts...`);
+    logger.info(`Logged in as ${readyClient.user.tag}.`);
     await ensureTargetChannel();
   });
 

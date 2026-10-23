@@ -22,6 +22,8 @@ Umgebungsvariablen (aus Infisical):
 - `DISCORD_PROGRESS_FORUM_ID` - Forum, das überwacht werden soll
 - `MONGO_URI` - MongoDB connection string für Persistenz der Crosspost Mappings
 - `MONGO_REMOVE_AFTER_DAYS` - Anzahl Tage nach denen Crosspost-Records gelöscht werden (negativ: alle löschen, `0`: deaktiviert)
+- `DISCORD_VC_CATEGORY` - Kategorie, in der die Voice-Channels verwaltet werden
+- `DISCORD_VC_POSITION_BEFORE` - Optionale Channel-ID: Die verwalteten Voice-Channels stehen als zusammenhängender Block direkt unter diesem Voice-/Stage-Channel in `DISCORD_VC_CATEGORY`. Bei leerem Wert, fehlendem oder ungeeignetem Zielchannel steht der Block am Ende der Kategorie.
 
 ## Verhalten
 
