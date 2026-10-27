@@ -4,6 +4,7 @@ const { CrosspostStore } = require("./src/crosspostStore");
 const { createDiscordClient } = require("./src/client");
 const { registerHandlers } = require("./src/handlers");
 const { ThreadColorStore } = require("./src/threadColorStore");
+const { createVoiceChannelManager } = require("./src/voiceChannelManager");
 const logger = require("./src/logger");
 
 const start = async () => {
@@ -40,6 +41,7 @@ const start = async () => {
     store,
     colorStore,
   });
+  createVoiceChannelManager({ client, config });
 
   await client.login(config.token);
 };

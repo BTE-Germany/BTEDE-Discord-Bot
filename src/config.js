@@ -29,7 +29,14 @@ const loadConfig = () => {
     throw new Error("MONGO_REMOVE_AFTER_DAYS must be a number (can be negative to delete all, 0 to disable).");
   }
 
-  return { token, guildId, targetChannelId, forumChannelId, mongoUri, pruneDays };
+  return {
+    token,
+    guildId,
+    targetChannelId,
+    forumChannelId,
+    mongoUri,
+    pruneDays,
+  };
 };
 
 module.exports = { loadConfig };

@@ -3,7 +3,13 @@ const logger = require("./logger");
 
 const createDiscordClient = (targetChannelId) => {
   const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMembers,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+      GatewayIntentBits.GuildVoiceStates,
+    ],
     partials: [Partials.Channel, Partials.Message],
   });
 
@@ -25,7 +31,7 @@ const createDiscordClient = (targetChannelId) => {
   };
 
   client.once(Events.ClientReady, async (readyClient) => {
-    logger.info(`Logged in as ${readyClient.user.tag}. Watching for new forum posts...`);
+    logger.info(`Logged in as ${readyClient.user.tag}.`);
     await ensureTargetChannel();
   });
 
